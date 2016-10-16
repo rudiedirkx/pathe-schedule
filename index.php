@@ -9,7 +9,8 @@ $date = '';
 
 // header('Content-type: text/plain; charset=utf-8');
 
-$url = rtrim("https://www.pathe.nl/bioscoop/$city/$date", '/');
+$base = 'https://www.pathe.nl';
+$url = rtrim("$base/bioscoop/$city/$date", '/');
 
 $html = getHTML($url, $cacheAge);
 
@@ -41,7 +42,7 @@ foreach ($results as $result) {
 	$hide = $result->hide ? ' hide' : '';
 
 	echo '<div data-href="' . $result->href . '" class="movie' . $todo . $hide . '">';
-	echo '<h3><a href="' . $result->href . '">' . $result->title . '</a></h3>';
+	echo '<h3><a href="' . $base . $result->href . '">' . $result->title . '</a></h3>';
 	echo '<ul>';
 	foreach ($result->times as $time) {
 		echo '<li>' . $time . '</li> ';
