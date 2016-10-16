@@ -93,7 +93,7 @@ function extractMovies(Crawler $crawler) {
 
 function getHTML($url, &$cacheAge = -1) {
 	$cacheName = sha1($url);
-	if (file_exists($cacheFile = __DIR__ . "/cache/$cacheName.html") && ($cacheAge = (time() - filemtime($cacheFile))) < 300) {
+	if (file_exists($cacheFile = PATHE_DOWNLOAD_DIR . "/$cacheName.html") && ($cacheAge = (time() - filemtime($cacheFile))) < PATHE_DOWNLOAD_TTL) {
 		$html = file_get_contents($cacheFile);
 	}
 	else {
