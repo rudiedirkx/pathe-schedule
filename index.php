@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\DomCrawler\Crawler;
+
 require __DIR__ . '/inc.bootstrap.php';
 
 $city = 'eindhoven';
@@ -11,15 +13,9 @@ $url = rtrim("https://www.pathe.nl/bioscoop/$city/$date", '/');
 
 $html = getHTML($url, $cacheAge);
 
+$crawler = new Crawler($html);
 
-
-$dom = new DOMDocument;
-libxml_use_internal_errors(true);
-$dom->loadHTML($html);
-
-
-
-$results = extractMovies($dom);
+$results = extractMovies($crawler);
 
 
 
@@ -56,37 +52,33 @@ foreach ($results as $result) {
 
 
 
-function extractMovies(DOMDocument $dom) {
+function extractMovies(Crawler $crawler) {
 	list($todos, $hides) = getPrefs();
 
-	$xpath = new DOMXPath($dom);
-
-	$schedule = getScheduleSection($dom);
+	$schedule = getScheduleSection($crawler);
 
 	$results = [];
-	foreach ($schedule->childNodes as $movie) {
-		if (!trim($movie->textContent)) continue;
+	$schedule->children()->each(function($node) use (&$results, $todos, $hides) {
 
-		$h4 = $movie->getElementsByTagName('h4')[0];
+		$h4 = $node->filter('h4')->first();
 
-		$href = trim($h4->getElementsByTagName('a')[0]->attributes->getNamedItem('href')->nodeValue);
+		$href = $h4->filter('a')->first()->attr('href');
 		$href = preg_replace('/#.*$/', '', $href);
 
-		$title = trim($h4->textContent);
+		$title = trim($h4->text());
 
 		$todo = in_array($href, $todos);
 		$hide = in_array($href, $hides);
 
-		$result = (object) [
+		$results[] = (object) [
 			'href' => $href,
 			'title' => $title,
-			'times' => getMovieTimes($xpath, $movie),
+			'times' => getMovieTimes($node),
 			'todo' => $todo,
 			'hide' => $hide,
 		];
 
-		$results[] = $result;
-	}
+	});
 
 	usort($results, function($a, $b) {
 		if ($a->todo) return -1;
@@ -123,11 +115,9 @@ function getPrefs() {
 	return [$todos, $hides];
 }
 
-function getMovieTimes(DOMXPath $xpath, DOMElement $movie) {
-	$nodes = $xpath->query($movie->getNodePath() . '//a[@data-tooltip]', $movie);
-
+function getMovieTimes(Crawler $node) {
 	$times = [];
-	foreach ($nodes as $time) {
+	foreach ($node->filter('a[data-tooltip]') as $time) {
 		$time = preg_replace('#\s+#', ' ', trim($time->textContent));
 		$times[] = $time;
 	}
@@ -135,13 +125,6 @@ function getMovieTimes(DOMXPath $xpath, DOMElement $movie) {
 	return $times;
 }
 
-function getScheduleSection(DOMDocument $dom) {
-	$sections = $dom->getElementsByTagName('section');
-	foreach ($sections as $section) {
-		$class = $section->attributes->getNamedItem('class');
-		$class = $class ? (string) $class->nodeValue : '';
-		if ($class && preg_match('#(^|\s)schedule\-simple(\s|$)#', $class)) {
-			return $section;
-		}
-	}
+function getScheduleSection(Crawler $crawler) {
+	return $crawler->filter('section.schedule-simple')->first();
 }
