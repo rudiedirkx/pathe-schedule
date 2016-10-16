@@ -5,7 +5,9 @@ use Symfony\Component\DomCrawler\Crawler;
 require __DIR__ . '/inc.bootstrap.php';
 
 $city = 'eindhoven';
-$date = '';
+$date = @$_GET['date'] ?: '';
+
+$date and $date = date('Y-m-d', strtotime($date));
 
 // header('Content-type: text/plain; charset=utf-8');
 
@@ -17,8 +19,6 @@ $html = getHTML($url, $cacheAge);
 $crawler = new Crawler($html);
 
 $results = extractMovies($crawler);
-
-
 
 ?>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -35,9 +35,15 @@ $results = extractMovies($crawler);
 }
 </style>
 
+<p><?= date('D d-M-Y', $date ? strtotime($date) : time()) ?> | <a href="?date=">Today</a> | <a href="?date=tomorrow">Tomorrow</a></p>
+
 <p>Cache is <?= $cacheAge ?> sec old.</p>
 
 <?php
+
+if (empty($results)) {
+	echo '<p>No movies found...</p>';
+}
 
 foreach ($results as $result) {
 	$todo = $result->todo ? ' todo' : '';
@@ -59,6 +65,9 @@ function extractMovies(Crawler $crawler) {
 	list($todos, $hides) = getPrefs();
 
 	$schedule = getScheduleSection($crawler);
+	if (count($schedule) == 0) {
+		return [];
+	}
 
 	$results = [];
 	$schedule->children()->each(function($node) use (&$results, $todos, $hides) {
