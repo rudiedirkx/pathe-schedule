@@ -35,9 +35,9 @@ $results = extractMovies($crawler);
 }
 </style>
 
-<p><?= date('D d-M-Y', $date ? strtotime($date) : time()) ?> | <a href="?date=">Today</a> | <a href="?date=tomorrow">Tomorrow</a></p>
+<p><?= date('D d-M-Y', $date ? strtotime($date) : time()) ?> | <a href="./">Today</a> | <a href="?date=tomorrow">Tomorrow</a></p>
 
-<p>Cache is <?= $cacheAge ?> sec old.</p>
+<p><a href="<?= $url ?>">Pathe.nl</a></p>
 
 <?php
 
@@ -58,6 +58,10 @@ foreach ($results as $result) {
 	echo '</ul>';
 	echo '</div>';
 }
+
+?>
+<p>Cache is <?= $cacheAge ?> sec old.</p>
+<?php
 
 
 
