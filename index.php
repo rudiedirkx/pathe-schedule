@@ -24,12 +24,38 @@ $results = extractMovies($crawler);
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta charset="utf-8" />
 <style>
-.todo a {
+html, body {
+	background: #ffc426;
+	color: black;
+}
+a {
+    color: black;
+}
+
+.movie {
+    background: black;
+    margin-bottom: 10px;
+    padding: 10px;
+    color: white;
+}
+.movie > h3 {
+    margin-top: 0;
+}
+.movie > ul,
+.movie.hide > h3 {
+    margin-bottom: 0;
+}
+
+.movie a {
+    color: lightblue;
+}
+.movie.todo a {
 	color: green;
 }
-.hide a {
+.movie.hide a {
 	color: red;
 }
+
 .hide ul {
 	display: none;
 }
