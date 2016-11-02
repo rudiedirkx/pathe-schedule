@@ -1,6 +1,6 @@
 <?php
 
-use Symfony\Component\DomCrawler\Crawler;
+use rdx\jsdom\Node;
 
 require __DIR__ . '/inc.bootstrap.php';
 
@@ -16,7 +16,7 @@ $url = rtrim("$base/bioscoop/$city/$date", '/');
 
 $html = getHTML($url, $cacheAge);
 
-$crawler = new Crawler($html);
+$crawler = Node::create($html);
 
 $results = extractMovies($crawler);
 
@@ -91,23 +91,23 @@ foreach ($results as $result) {
 
 
 
-function extractMovies(Crawler $crawler) {
+function extractMovies(Node $crawler) {
 	list($todos, $hides) = getPrefs();
 
 	$schedule = getScheduleSection($crawler);
-	if (count($schedule) == 0) {
+	if (!$schedule) {
 		return [];
 	}
 
 	$results = [];
-	$schedule->children()->each(function($node) use (&$results, $todos, $hides) {
+	foreach ($schedule->children() as $node) {
 
-		$h4 = $node->filter('h4')->first();
+		$h4 = $node->query('h4');
 
-		$href = $h4->filter('a')->first()->attr('href');
+		$href = $h4->query('a')['href'];
 		$href = preg_replace('/#.*$/', '', $href);
 
-		$title = trim($h4->text());
+		$title = trim($h4->innerText);
 
 		$todo = in_array($href, $todos);
 		$hide = in_array($href, $hides);
@@ -120,7 +120,7 @@ function extractMovies(Crawler $crawler) {
 			'hide' => $hide,
 		];
 
-	});
+	}
 
 	usort($results, function($a, $b) {
 		if ($a->todo) return -1;
@@ -157,16 +157,15 @@ function getPrefs() {
 	return [$todos, $hides];
 }
 
-function getMovieTimes(Crawler $node) {
+function getMovieTimes(Node $node) {
 	$times = [];
-	foreach ($node->filter('a[data-tooltip]') as $time) {
-		$time = preg_replace('#\s+#', ' ', trim($time->textContent));
-		$times[] = $time;
+	foreach ($node->queryAll('a[data-tooltip]') as $time) {
+		$times[] = $time->innerText;
 	}
 
 	return $times;
 }
 
-function getScheduleSection(Crawler $crawler) {
-	return $crawler->filter('section.schedule-simple')->first();
+function getScheduleSection(Node $crawler) {
+	return $crawler->query('section.schedule-simple');
 }
