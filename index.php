@@ -159,8 +159,18 @@ function getPrefs() {
 
 function getMovieTimes(Node $node) {
 	$times = [];
-	foreach ($node->queryAll('a[data-tooltip]') as $time) {
-		$times[] = $time->innerText;
+	foreach ($node->queryAll('a[data-tooltip]') as $timeEl) {
+		$time = $timeEl->innerText;
+
+		if ($tooltip = $timeEl->nextElementSibling) {
+			if ($period = $tooltip->query('p')->innerText) {
+				if (preg_match('#van.+?\d\d?:\d\d.+?tot.+?(\d\d?:\d\d)#i', $period, $match)) {
+					$time = preg_replace('#^(\d\d?:\d\d)#', '$1 - ' . $match[1] . ' &nbsp;', $time);
+				}
+			}
+		}
+
+		$times[] = $time;
 	}
 
 	return $times;
