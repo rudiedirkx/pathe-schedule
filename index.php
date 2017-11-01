@@ -100,7 +100,7 @@ function extractMovies(Node $crawler) {
 	}
 
 	$results = [];
-	foreach ($schedule->children() as $node) {
+	foreach ($schedule->children('.schedule-simple__item') as $node) {
 
 		$h4 = $node->query('h4');
 
