@@ -57,7 +57,7 @@ a {
 }
 
 .hide ul {
-	display: none;
+	x-display: none;
 }
 </style>
 
