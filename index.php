@@ -94,6 +94,9 @@ foreach ($results as $result) {
 function extractMovies(Node $crawler) {
 	list($todos, $hides) = getPrefs();
 
+	$todoRegex = '#(' . implode('|', array_map('preg_quote', $todos)) . ')#';
+	$hideRegex = '#(' . implode('|', array_map('preg_quote', $hides)) . ')#';
+
 	$schedule = getScheduleSection($crawler);
 	if (!$schedule) {
 		return [];
@@ -109,8 +112,8 @@ function extractMovies(Node $crawler) {
 
 		$title = trim($h4->innerText);
 
-		$todo = in_array($href, $todos);
-		$hide = in_array($href, $hides);
+		$todo = preg_match($todoRegex, $href) > 0;
+		$hide = preg_match($hideRegex, $href) > 0;
 
 		$results[] = (object) [
 			'href' => $href,
