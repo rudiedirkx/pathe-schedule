@@ -12,7 +12,7 @@ $date and $date = date('Y-m-d', strtotime($date));
 // header('Content-type: text/plain; charset=utf-8');
 
 $base = 'https://www.pathe.nl';
-$url = rtrim("$base/bioscoop/$city/$date", '/');
+$url = "$base/bioscoop/$city?date=$date";
 
 $html = getHTML($url, $cacheAge);
 
@@ -61,7 +61,13 @@ a {
 }
 </style>
 
-<p><?= date('D d-M-Y', $date ? strtotime($date) : time()) ?> | <a href="./">Today</a> | <a href="?date=tomorrow">Tomorrow</a></p>
+<p>
+	<?= date('D d-M-Y', $date ? strtotime($date) : time()) ?> |
+	<a href="./">Today</a> |
+	<a href="?date=tomorrow">Tomorrow</a> |
+	<a href="?date=<?= urlencode('+2 days') ?>">+2</a> |
+	<a href="?date=<?= urlencode('+3 days') ?>">+3</a>
+</p>
 
 <p><a href="<?= $url ?>">Pathe.nl</a></p>
 
