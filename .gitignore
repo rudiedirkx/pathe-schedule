@@ -1,3 +1,4 @@
-vendor/
-cache/
-env.php
+/vendor/
+/cache/
+/db/
+/env.php

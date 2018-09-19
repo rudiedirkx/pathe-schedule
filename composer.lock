@@ -4,21 +4,55 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "96e9fb14ecbb81c3aedc3895d1b18619",
-    "content-hash": "ebd45fe40bc2f7df160e8696365affaa",
+    "content-hash": "1bbc14c5b522dec17f0ac0c4d8492918",
     "packages": [
         {
-            "name": "rdx/js-dom",
-            "version": "dev-master",
+            "name": "rdx/db",
+            "version": "1.13",
             "source": {
                 "type": "git",
-                "url": "https://github.com/rudiedirkx/php-js-dom.git",
-                "reference": "946096e33d35044d1eece6fb28a25bc79cd0a8da"
+                "url": "https://github.com/rudiedirkx/db_generic.git",
+                "reference": "77e5c24725f6d4bedfa6ed02a678104210360722"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rudiedirkx/php-js-dom/zipball/946096e33d35044d1eece6fb28a25bc79cd0a8da",
-                "reference": "946096e33d35044d1eece6fb28a25bc79cd0a8da",
+                "url": "https://api.github.com/repos/rudiedirkx/db_generic/zipball/77e5c24725f6d4bedfa6ed02a678104210360722",
+                "reference": "77e5c24725f6d4bedfa6ed02a678104210360722",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "db_generic.php",
+                    "db_mysql.php",
+                    "db_sqlite.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rudie Dirkx",
+                    "email": "github@hotblocks.nl"
+                }
+            ],
+            "description": "Simple MySQL/SQLite wrapper",
+            "time": "2018-09-15T13:46:29+00:00"
+        },
+        {
+            "name": "rdx/js-dom",
+            "version": "1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rudiedirkx/php-js-dom.git",
+                "reference": "c36b2ba7580a344fb8e2a305a784e25698cd642f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rudiedirkx/php-js-dom/zipball/c36b2ba7580a344fb8e2a305a784e25698cd642f",
+                "reference": "c36b2ba7580a344fb8e2a305a784e25698cd642f",
                 "shasum": ""
             },
             "require": {
@@ -41,29 +75,29 @@
                 }
             ],
             "description": "JS-like DOM traversal",
-            "time": "2017-01-15 23:25:50"
+            "time": "2018-01-07T01:03:25+00:00"
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.1.5",
+            "version": "v3.4.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "ca809c64072e0fe61c1c7fb3c76cdc32265042ac"
+                "reference": "edda5a6155000ff8c3a3f85ee5c421af93cca416"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/ca809c64072e0fe61c1c7fb3c76cdc32265042ac",
-                "reference": "ca809c64072e0fe61c1c7fb3c76cdc32265042ac",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/edda5a6155000ff8c3a3f85ee5c421af93cca416",
+                "reference": "edda5a6155000ff8c3a3f85ee5c421af93cca416",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9"
+                "php": "^5.5.9|>=7.0.8"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -94,15 +128,13 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "time": "2016-09-06 11:02:40"
+            "time": "2018-07-26T09:06:28+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "rdx/js-dom": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
