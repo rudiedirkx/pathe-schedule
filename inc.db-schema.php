@@ -1,8 +1,13 @@
 <?php
 
 return [
-	'version' => 2,
+	'version' => 4,
 	'tables' => [
+		'fetches' => [
+			'id' => ['pk' => true],
+			'date' => ['type' => 'date'],
+			'fetched_on' => ['unsigned' => true],
+		],
 		'movies' => [
 			'id' => ['pk' => true],
 			'pathe_id',

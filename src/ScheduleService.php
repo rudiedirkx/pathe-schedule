@@ -12,9 +12,17 @@ class ScheduleService {
 
 	public function __construct( $city, $date ) {
 		$this->city = $city;
-		$this->date = $date;
+		$this->date = max(date('Y-m-d'), $date);
 
 		$this->db = $GLOBALS['db'];
+	}
+
+	public function getDate() {
+		return $this->date;
+	}
+
+	public function getTitle() {
+		return date('l d-M', strtotime($this->date));
 	}
 
 	public function getSchedule() {
@@ -22,8 +30,13 @@ class ScheduleService {
 			$this->fetch();
 		}
 
-		$startTime = date('H:i', strtotime('-2 hours'));
-		$showings = Showing::all('date = ? AND start_time > ? ORDER BY start_time ASC', [$this->date, $startTime]);
+		if ( $this->date == date('Y-m-d') ) {
+			$startTime = date('H:i');
+			$showings = Showing::all('date = ? AND end_time >= ? ORDER BY start_time ASC', [$this->date, $startTime]);
+		}
+		else {
+			$showings = Showing::all('date = ? ORDER BY start_time ASC', [$this->date]);
+		}
 		Showing::eager('movie', $showings);
 
 		$movies = [];
@@ -40,7 +53,11 @@ class ScheduleService {
 	}
 
 	public function getLastFetch() {
-		return $this->db->max(Showing::$_table, 'last_fetch', '1');
+		return $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
+	}
+
+	protected function saveLastFetch() {
+		return $this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => time()]);
 	}
 
 	public function needsFetch() {
@@ -147,7 +164,7 @@ class ScheduleService {
 		$crawler = Node::create($html);
 
 		$schedule = $crawler->query('section.schedule-simple');
-		if ( !$schedule ) return;
+		if ( !$schedule ) return $this->saveLastFetch();
 
 		$movieNodes = $schedule->children('.schedule-simple__item');
 		foreach ($movieNodes as $movieNode) {
@@ -169,6 +186,8 @@ class ScheduleService {
 				$this->persistShowing($movie, $startTime, $endTime, $label);
 			}
 		}
+
+		$this->saveLastFetch();
 	}
 
 }
