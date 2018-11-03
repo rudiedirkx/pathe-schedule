@@ -14,6 +14,8 @@ $date = $service->getDate();
 $movies = $service->getSchedule();
 
 ?>
+<meta name="viewport" content="initial-scale=1" />
+<meta name="theme-color" content="#333" />
 <title><?= html($service->getTitle()) ?></title>
 
 <p>
