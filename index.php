@@ -13,10 +13,10 @@ $date = $service->getDate();
 
 $movies = $service->getSchedule();
 
+$title = $service->getTitle();
+include 'tpl.header.php';
+
 ?>
-<meta name="viewport" content="initial-scale=1" />
-<meta name="theme-color" content="#333" />
-<title><?= html($service->getTitle()) ?></title>
 
 <p>
 	<a href="./">Today</a> |
@@ -44,3 +44,5 @@ $movies = $service->getSchedule();
 <? endforeach ?>
 
 <p>Cache is <?= $service->getCacheAge() ?> sec old.</p>
+
+<p><a href="stats.php">Stats</a></p>
