@@ -9,6 +9,7 @@ class ScheduleService {
 
 	protected $city;
 	protected $date;
+	protected $watchlist;
 
 	public function __construct( $city, $date ) {
 		$this->city = $city;
@@ -39,13 +40,55 @@ class ScheduleService {
 		}
 		Showing::eager('movie', $showings);
 
+		$watchlist = $this->fetchWatchlist();
+
 		$movies = [];
 		foreach ( $showings as $showing ) {
-			isset($movies[$showing->movie_id]) or $movies[$showing->movie_id] = new ScheduleMovie($showing->movie);
+			if ( !isset($movies[$showing->movie_id]) ) {
+				$movies[$showing->movie_id] = new ScheduleMovie($showing->movie);
+				$movies[$showing->movie_id]->setStatus($this->getWatchlistStatus($showing->movie));
+			}
+
 			$movies[$showing->movie_id]->addShowing($showing);
 		}
 
+		if ( $watchlist ) {
+			usort($movies, function(ScheduleMovie $a, ScheduleMovie $b) {
+				return $a->statusToInt() <=> $b->statusToInt();
+			});
+		}
+
 		return $movies;
+	}
+
+	protected function fetchWatchlist() {
+		if ( PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE ) {
+			$url = PATHE_OBJECT_STORE_URL . '/?store=' . PATHE_OBJECT_STORE . '&get=pathe';
+			$json = file_get_contents($url);
+			$json = substr($json, strpos($json, '{'));
+			$data = json_decode($json, true);
+			if ( $data['exists'] ) {
+				$this->watchlist = array_map(function($list) {
+					return array_map([$this, 'getMovieId'], $list);
+				}, $data['value']);
+
+				return true;
+			}
+		}
+
+		$this->watchlist += ['todo' => [], 'hide' => []];
+
+		return false;
+	}
+
+	protected function getWatchlistStatus( Movie $movie ) {
+		if ( in_array($movie->pathe_id, $this->watchlist['todo']) ) {
+			return 'todo';
+		}
+
+		if ( in_array($movie->pathe_id, $this->watchlist['hide']) ) {
+			return 'hide';
+		}
 	}
 
 	public function getCacheAge() {

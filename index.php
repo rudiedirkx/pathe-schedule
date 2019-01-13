@@ -28,7 +28,7 @@ include 'tpl.header.php';
 <h1><a href="<?= html($service->getScheduleUrl()) ?>"><?= html($service->getTitle()) ?></a></h1>
 
 <? foreach ($movies as $movie): ?>
-	<div class="movie">
+	<div class="movie <?= $movie->status ?>">
 		<h3><?= html($movie->movie) ?></h3>
 		<ul>
 			<? foreach ($movie->showings as $showing): ?>
