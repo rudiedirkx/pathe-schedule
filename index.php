@@ -46,3 +46,8 @@ include 'tpl.header.php';
 <p>Cache is <?= $service->getCacheAge() ?> sec old.</p>
 
 <p><a href="stats.php">Stats</a></p>
+
+<details>
+	<summary>Queries (<?= count($db->queries) ?>)</summary>
+	<pre><? print_r($db->queries) ?></pre>
+</details>
