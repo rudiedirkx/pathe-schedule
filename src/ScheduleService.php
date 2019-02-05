@@ -7,13 +7,31 @@ use rdx\jsdom\Node;
 
 class ScheduleService {
 
+	const DAY_START = '03:00';
+
 	protected $city;
+	protected $origDate;
 	protected $date;
+	protected $time;
 	protected $watchlist;
 
 	public function __construct( $city, $date ) {
 		$this->city = $city;
-		$this->date = max(date('Y-m-d'), $date);
+
+		$this->date = $date;
+		$this->time = date('H:i');
+
+		if ($this->time < self::DAY_START) {
+			$this->origDate = date('Y-m-d', strtotime($this->date));
+			$this->date = date('Y-m-d', strtotime('-1 days', strtotime($this->date)));
+
+			list($hour, $minute) = explode(':', $this->time);
+			$hour += 24;
+			$this->time = "$hour:$minute";
+		}
+		else {
+			$this->date = $this->origDate = date('Y-m-d', strtotime($this->date));
+		}
 
 		$this->db = $GLOBALS['db'];
 	}
@@ -31,9 +49,9 @@ class ScheduleService {
 			$this->fetch();
 		}
 
-		if ( $this->date == date('Y-m-d') ) {
-			$startTime = date('H:i');
-			$showings = Showing::all('date = ? AND end_time >= ? ORDER BY start_time ASC', [$this->date, $startTime]);
+		if ( $this->origDate == date('Y-m-d') ) {
+			$startTime = $this->time;
+			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->date, $startTime]);
 		}
 		else {
 			$showings = Showing::all('date = ? ORDER BY start_time ASC', [$this->date]);
@@ -173,6 +191,9 @@ class ScheduleService {
 	}
 
 	public function persistShowing( Movie $movie, $startTime, $endTime, $label ) {
+		$startTime = self::timePlus24($startTime) ?? $startTime;
+		$endTime = self::timePlus24($endTime) ?? $endTime;
+
 		$showing = Showing::first([
 			'movie_id' => $movie->id,
 			'date' => $this->date,
@@ -231,6 +252,22 @@ class ScheduleService {
 		}
 
 		$this->saveLastFetch();
+	}
+
+	static public function timePlus24( $time ) {
+		if ( $time < ScheduleService::DAY_START ) {
+			list($hour, $minute) = explode(':', $time);
+			$hour += 24;
+			return "$hour:$minute";
+		}
+	}
+
+	static public function timeMinus24( $time ) {
+		if ($time >= '24:00') {
+			list($hour, $minute) = explode(':', $time);
+			$hour -= 24;
+			return str_pad($hour, 2, '0', STR_PAD_LEFT) . ":$minute";
+		}
 	}
 
 }

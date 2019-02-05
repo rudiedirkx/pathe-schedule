@@ -6,7 +6,6 @@ use rdx\pathe\Showing;
 require __DIR__ . '/inc.bootstrap.php';
 
 $date = $_GET['date'] ?? 'today';
-$date = date('Y-m-d', strtotime($date));
 
 $service = new ScheduleService('eindhoven', $date);
 $date = $service->getDate();
@@ -29,11 +28,11 @@ include 'tpl.header.php';
 
 <? foreach ($movies as $movie): ?>
 	<div class="movie <?= $movie->status ?>">
-		<h3><?= html($movie->movie) ?></h3>
+		<h3><?= html($movie->movie) ?> (<?= $movie->movie->pretty_release_date ?>)</h3>
 		<ul>
 			<? foreach ($movie->showings as $showing): ?>
 				<li>
-					<?= html($showing->start_time) ?> - <?= html($showing->end_time) ?>
+					<?= html($showing->orig_start_time) ?> - <?= html($showing->orig_end_time) ?>
 					<? if ($showing->flags): ?>
 						| <?= html(strtoupper($showing->flags)) ?>
 					<? endif ?>

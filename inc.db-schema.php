@@ -1,5 +1,8 @@
 <?php
 
+use rdx\pathe\ScheduleService;
+use rdx\pathe\Showing;
+
 return [
 	'version' => 4,
 	'tables' => [
@@ -26,5 +29,21 @@ return [
 			'first_fetch' => ['unsigned' => true, 'default' => 0],
 			'last_fetch' => ['unsigned' => true, 'default' => 0],
 		],
+	],
+	'updates' => [
+		function($db) {
+			$start = ScheduleService::DAY_START;
+			$showings = Showing::all("start_time < ? OR end_time < ?", [$start, $start]);
+			foreach ($showings as $showing) {
+				$update = [];
+				foreach (['start_time', 'end_time'] as $field) {
+					if ($time = ScheduleService::timePlus24($showing->$field)) {
+						$update[$field] = $time;
+					}
+				}
+
+				$showing->update($update);
+			}
+		},
 	],
 ];
