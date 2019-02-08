@@ -36,6 +36,9 @@ include 'tpl.header.php';
 					<? if ($showing->flags): ?>
 						| <?= html(strtoupper($showing->flags)) ?>
 					<? endif ?>
+					<?if ($showing->progress > 0): ?>
+						<div class="progress"><div class="done" style="width: <?= $showing->progress ?>%"></div></div>
+					<? endif ?>
 				</li>
 			<? endforeach ?>
 		</ul>

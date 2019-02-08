@@ -36,4 +36,14 @@ a {
 .movie.hide h3 {
 	color: red;
 }
+
+.progress {
+	background-color: white;
+	position: relative;
+	top: -2px;
+}
+.progress > .done {
+	height: 2px;
+	background-color: green;
+}
 </style>
