@@ -19,10 +19,20 @@ class Showing extends db_generic_model {
 	protected function get_progress() {
 		$now = date('Y-m-d H:i:s');
 
-		if ( "$this->date $this->start_time" > $now ) {
+		$start = "$this->date $this->start_time";
+		if ( $time = ScheduleService::timeMinus24($this->start_time) ) {
+			$start = date('Y-m-d', strtotime('+1 day', strtotime($this->date))) . ' ' . $time;
+		}
+
+		$end = "$this->date $this->end_time";
+		if ( $time = ScheduleService::timeMinus24($this->end_time) ) {
+			$end = date('Y-m-d', strtotime('+1 day', strtotime($this->date))) . ' ' . $time;
+		}
+
+		if ( $start > $now ) {
 			return 0;
 		}
-		elseif ( "$this->date $this->end_time" < $now ) {
+		elseif ( $end < $now ) {
 			return 100;
 		}
 
