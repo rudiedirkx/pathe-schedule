@@ -58,7 +58,7 @@ class ScheduleService {
 		}
 		Showing::eager('movie', $showings);
 
-		$watchlist = $this->fetchWatchlist();
+		$useWatchlist = $this->fetchWatchlist();
 
 		$movies = [];
 		foreach ( $showings as $showing ) {
@@ -70,11 +70,19 @@ class ScheduleService {
 			$movies[$showing->movie_id]->addShowing($showing);
 		}
 
-		if ( $watchlist ) {
-			usort($movies, function(ScheduleMovie $a, ScheduleMovie $b) {
-				return $a->statusToInt() <=> $b->statusToInt();
-			});
-		}
+		usort($movies, function(ScheduleMovie $a, ScheduleMovie $b) use ($useWatchlist) {
+			$watchlistOrder = 0;
+			if ( $useWatchlist ) {
+				$watchlistOrder = $a->statusToInt() <=> $b->statusToInt();
+			}
+
+			if ( $watchlistOrder != 0 ) {
+				return $watchlistOrder;
+			}
+
+			$dateOrder = $a->movie->release_date <=> $b->movie->release_date;
+			return $dateOrder;
+		});
 
 		return $movies;
 	}
