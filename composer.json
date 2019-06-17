@@ -3,7 +3,7 @@
     "description": "Mobile Pathe schedule",
     "type": "project",
     "require": {
-        "rdx/db": "^1.13",
+        "rdx/db": "^1.15",
         "rdx/js-dom": "^1.1"
     },
     "autoload": {

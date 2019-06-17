@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "1bbc14c5b522dec17f0ac0c4d8492918",
+    "content-hash": "ef87c2a076edf0c1f04c6d64f10b7c13",
     "packages": [
         {
             "name": "rdx/db",
-            "version": "1.13",
+            "version": "1.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rudiedirkx/db_generic.git",
-                "reference": "77e5c24725f6d4bedfa6ed02a678104210360722"
+                "reference": "860fdb12625258c63c0d3e2f551ddf7c457e55a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rudiedirkx/db_generic/zipball/77e5c24725f6d4bedfa6ed02a678104210360722",
-                "reference": "77e5c24725f6d4bedfa6ed02a678104210360722",
+                "url": "https://api.github.com/repos/rudiedirkx/db_generic/zipball/860fdb12625258c63c0d3e2f551ddf7c457e55a2",
+                "reference": "860fdb12625258c63c0d3e2f551ddf7c457e55a2",
                 "shasum": ""
             },
             "type": "library",
@@ -39,7 +39,7 @@
                 }
             ],
             "description": "Simple MySQL/SQLite wrapper",
-            "time": "2018-09-15T13:46:29+00:00"
+            "time": "2019-06-17T23:54:22+00:00"
         },
         {
             "name": "rdx/js-dom",
@@ -79,16 +79,16 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.4.15",
+            "version": "v3.4.28",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "edda5a6155000ff8c3a3f85ee5c421af93cca416"
+                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/edda5a6155000ff8c3a3f85ee5c421af93cca416",
-                "reference": "edda5a6155000ff8c3a3f85ee5c421af93cca416",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
+                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
                 "shasum": ""
             },
             "require": {
@@ -128,7 +128,7 @@
             ],
             "description": "Symfony CssSelector Component",
             "homepage": "https://symfony.com",
-            "time": "2018-07-26T09:06:28+00:00"
+            "time": "2019-01-16T09:39:14+00:00"
         }
     ],
     "packages-dev": [],
