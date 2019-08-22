@@ -12,7 +12,7 @@ $numFetches = $db->select_one('fetches', 'count(1)', '1');
 $dates = $db->fetch('select min(date) first, max(date) last from fetches')->first();
 $numMovies = $db->select_one('movies', 'count(1)', '1');
 $numShowings = $db->select_one('showings', 'count(1)', '1');
-$flags = $db->select_fields('showings', 'distinct flags', "flags <> '' ORDER BY length(flags)");
+$flags = $db->select_fields('showings', 'distinct flags, count(1) num', "flags <> '' GROUP BY flags ORDER BY num DESC");
 
 ?>
 
@@ -30,5 +30,5 @@ $flags = $db->select_fields('showings', 'distinct flags', "flags <> '' ORDER BY 
 	<dd><?= number_format($numShowings, 0, '.', ' ') ?></dd>
 
 	<dt>Showing flags</dt>
-	<dd><ul><li><?= implode('</li><li>', $flags) ?></li></ul></dd>
+	<dd><? foreach ($flags as $flag => $used): ?><?= $flag ?>: <?= $used ?><br><? endforeach ?></dd>
 </dl>
