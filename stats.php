@@ -12,7 +12,15 @@ $numFetches = $db->select_one('fetches', 'count(1)', '1');
 $dates = $db->fetch('select min(date) first, max(date) last from fetches')->first();
 $numMovies = $db->select_one('movies', 'count(1)', '1');
 $numShowings = $db->select_one('showings', 'count(1)', '1');
-$flags = $db->select_fields('showings', 'flags, count(1) num', "1 GROUP BY flags ORDER BY num DESC");
+$rawFlags = $db->select_fields('showings', 'flags, count(1) num', "1 GROUP BY flags");
+
+$flags = [];
+foreach ($rawFlags as $flag => $num) {
+	$flag = preg_replace('#\bnacht (\d+[ -](?:\w+ )?op \d+[ -]\w+)#', 'nacht X op Y', $flag);
+	isset($flags[$flag]) or $flags[$flag] = 0;
+	$flags[$flag] += $num;
+}
+arsort($flags, SORT_NUMERIC);
 
 ?>
 
