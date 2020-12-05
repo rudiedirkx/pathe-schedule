@@ -232,7 +232,8 @@ class ScheduleService {
 
 	public function fetch() {
 		$url = $this->getScheduleUrl();
-		$html = file_get_contents($url);
+		$html = @file_get_contents($url);
+		if (!$html) return;
 		$crawler = Node::create($html);
 
 		$schedule = $crawler->query('section.schedule-simple');
