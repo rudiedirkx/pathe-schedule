@@ -13,10 +13,12 @@ class ScheduleService {
 	protected $origDate;
 	protected $date;
 	protected $time;
+	protected $removeFromLabel;
 	protected $watchlist;
 
-	public function __construct( $city, $date ) {
+	public function __construct( string $city, string $date, string $removeFromLabel ) {
 		$this->city = $city;
+		$this->removeFromLabel = $removeFromLabel;
 
 		$this->date = $date;
 		$this->time = date('H:i');
@@ -202,6 +204,8 @@ class ScheduleService {
 		$startTime = self::timePlus24($startTime) ?? $startTime;
 		$endTime = self::timePlus24($endTime) ?? $endTime;
 
+		$label = trim(preg_replace($this->removeFromLabel, '', strtolower($label)));
+
 		$showing = Showing::first([
 			'movie_id' => $movie->id,
 			'date' => $this->date,
@@ -211,7 +215,7 @@ class ScheduleService {
 		if ( $showing ) {
 			$showing->update([
 				'end_time' => $endTime,
-				'flags' => strtolower($label) ?: null,
+				'flags' => $label ?: null,
 				'last_fetch' => time(),
 			]);
 		}
@@ -221,7 +225,7 @@ class ScheduleService {
 				'date' => $this->date,
 				'start_time' => $startTime,
 				'end_time' => $endTime,
-				'flags' => strtolower($label) ?: null,
+				'flags' => $label ?: null,
 				'first_fetch' => time(),
 				'last_fetch' => time(),
 			]));

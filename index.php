@@ -7,7 +7,7 @@ require __DIR__ . '/inc.bootstrap.php';
 
 $date = $_GET['date'] ?? 'today';
 
-$service = new ScheduleService('eindhoven', $date);
+$service = new ScheduleService('eindhoven', $date, '#\b(relax seat)\b#');
 $date = $service->getDate();
 
 $movies = $service->getSchedule();
