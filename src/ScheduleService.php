@@ -205,6 +205,9 @@ class ScheduleService {
 		$endTime = self::timePlus24($endTime) ?? $endTime;
 
 		$label = trim(preg_replace($this->removeFromLabel, '', strtolower($label)));
+		$saveLabel = in_array($label, ['uitverkocht']) ? [] : [
+			'flags' => $label ?: null,
+		];
 
 		$showing = Showing::first([
 			'movie_id' => $movie->id,
@@ -213,19 +216,17 @@ class ScheduleService {
 		]);
 
 		if ( $showing ) {
-			$showing->update([
+			$showing->update($saveLabel + [
 				'end_time' => $endTime,
-				'flags' => $label ?: null,
 				'last_fetch' => time(),
 			]);
 		}
 		else {
-			$showing = Showing::find(Showing::insert([
+			$showing = Showing::find(Showing::insert($saveLabel + [
 				'movie_id' => $movie->id,
 				'date' => $this->date,
 				'start_time' => $startTime,
 				'end_time' => $endTime,
-				'flags' => $label ?: null,
 				'first_fetch' => time(),
 				'last_fetch' => time(),
 			]));
