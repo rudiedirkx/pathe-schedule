@@ -8,7 +8,7 @@ require __DIR__ . '/inc.bootstrap.php';
 $title = 'Stats';
 include 'tpl.header.php';
 
-# bar
+# bar 2
 
 $numFetches = $db->select_one('fetches', 'count(1)', '1');
 $dates = $db->fetch('select min(date) first, max(date) last from fetches')->first();
