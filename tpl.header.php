@@ -26,6 +26,9 @@ a {
 .movie h3 a {
 	color: inherit;
 }
+.movie a.arrow {
+	text-decoration: none;
+}
 .movie ul,
 .movie.hide h3 {
 	margin-bottom: 0;

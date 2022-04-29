@@ -28,7 +28,13 @@ include 'tpl.header.php';
 
 <? foreach ($movies as $movie): ?>
 	<div class="movie <?= $movie->status ?>">
-		<h3><?= html($movie->movie) ?> (<?= $movie->movie->pretty_release_date ?>)</h3>
+		<h3>
+			<?= html($movie->movie) ?>
+			(<?= $movie->movie->pretty_release_date ?>)
+			<? if (IMDB_SEARCH_URL): ?>
+				<a class="arrow" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">&#10132;</a>
+			<? endif ?>
+		</h3>
 		<ul>
 			<? foreach ($movie->showings as $showing): ?>
 				<li>
