@@ -4,6 +4,9 @@
 <head>
 <meta name="viewport" content="initial-scale=1" />
 <meta name="theme-color" content="#333" />
+<link rel="icon" type="image/png" href="/favicon-128.png" sizes="128x128" />
+<link rel="icon" href="/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <title><?= html($title ? "$title - " : '') ?>Pathe</title>
 <style>
 html, body {
