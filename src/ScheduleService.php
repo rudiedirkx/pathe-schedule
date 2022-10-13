@@ -162,13 +162,15 @@ class ScheduleService {
 		throw new InvalidArgumentException("Can't extract movie ID from [href]: '$href'");
 	}
 
-	public function getMovieReleaseDate( $href ) {
+	public function getMovieReleaseDate(string $href) : ?string {
 		$url = $this->getMovieUrl($href);
-		$html = file_get_contents($url);
+		$html = @file_get_contents($url);
+		if (!$html) return null;
 		$text = strip_tags($html);
-		if ( preg_match('#Release\s*:\s+(\d+)-(\d+)-(\d{4})#', $text, $match) ) {
+		if (preg_match('#Release\s*:\s+(\d+)-(\d+)-(\d{4})#', $text, $match)) {
 			return date('Y-m-d', strtotime($match[3] . '-' . $match[2] . '-' . $match[1]));
 		}
+		return null;
 	}
 
 	public function persistMovie( $href, $name ) {
