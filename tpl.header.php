@@ -9,19 +9,27 @@
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <title><?= html($title ? "$title - " : '') ?>Pathe</title>
 <style>
-html, body {
-	background: #ffc426;
-	color: black;
+:root {
+	--yellow: #ffc426;
+	--color-text: #000;
+	--color-background: var(--yellow);
+	--color-movie-background: #000;
+	--color-movie-text: #fff;
+}
+html {
+	background: var(--color-background);
+	color: var(--color-text);
+	font-family: sans-serif;
 }
 a {
-	color: black;
+	color: var(--color-text);
 }
 
 .movie {
-	background: black;
+	background: var(--color-movie-background);
 	margin-bottom: 10px;
 	padding: 10px;
-	color: white;
+	color: var(--color-movie-text);
 }
 .movie h3 {
 	margin-top: 0;
@@ -55,6 +63,15 @@ a {
 .progress > .done {
 	height: 2px;
 	background-color: green;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-text: var(--yellow);
+		--color-background: #000;
+		--color-movie-background: #111;
+		--color-movie-text: var(--yellow);
+	}
 }
 </style>
 </head>
