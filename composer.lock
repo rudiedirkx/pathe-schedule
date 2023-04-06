@@ -1,31 +1,32 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "ef87c2a076edf0c1f04c6d64f10b7c13",
     "packages": [
         {
             "name": "rdx/db",
-            "version": "1.15",
+            "version": "1.25",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rudiedirkx/db_generic.git",
-                "reference": "860fdb12625258c63c0d3e2f551ddf7c457e55a2"
+                "reference": "e4dd4b6026b5baf643c71e6d54038af03654d80d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rudiedirkx/db_generic/zipball/860fdb12625258c63c0d3e2f551ddf7c457e55a2",
-                "reference": "860fdb12625258c63c0d3e2f551ddf7c457e55a2",
+                "url": "https://api.github.com/repos/rudiedirkx/db_generic/zipball/e4dd4b6026b5baf643c71e6d54038af03654d80d",
+                "reference": "e4dd4b6026b5baf643c71e6d54038af03654d80d",
                 "shasum": ""
             },
             "type": "library",
             "autoload": {
                 "classmap": [
-                    "db_generic.php",
-                    "db_mysql.php",
-                    "db_sqlite.php"
+                    "./"
+                ],
+                "exclude-from-classmap": [
+                    "/test/"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -39,24 +40,28 @@
                 }
             ],
             "description": "Simple MySQL/SQLite wrapper",
-            "time": "2019-06-17T23:54:22+00:00"
+            "support": {
+                "issues": "https://github.com/rudiedirkx/db_generic/issues",
+                "source": "https://github.com/rudiedirkx/db_generic/tree/1.25"
+            },
+            "time": "2022-09-21T21:49:08+00:00"
         },
         {
             "name": "rdx/js-dom",
-            "version": "1.1",
+            "version": "1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rudiedirkx/php-js-dom.git",
-                "reference": "c36b2ba7580a344fb8e2a305a784e25698cd642f"
+                "reference": "10ae462d9824b6baa5eb76407692d5bb40f42513"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rudiedirkx/php-js-dom/zipball/c36b2ba7580a344fb8e2a305a784e25698cd642f",
-                "reference": "c36b2ba7580a344fb8e2a305a784e25698cd642f",
+                "url": "https://api.github.com/repos/rudiedirkx/php-js-dom/zipball/10ae462d9824b6baa5eb76407692d5bb40f42513",
+                "reference": "10ae462d9824b6baa5eb76407692d5bb40f42513",
                 "shasum": ""
             },
             "require": {
-                "symfony/css-selector": "^3.1"
+                "symfony/css-selector": "^3.1 || ^4.0 || ^5.0"
             },
             "type": "library",
             "autoload": {
@@ -75,31 +80,31 @@
                 }
             ],
             "description": "JS-like DOM traversal",
-            "time": "2018-01-07T01:03:25+00:00"
+            "support": {
+                "issues": "https://github.com/rudiedirkx/php-js-dom/issues",
+                "source": "https://github.com/rudiedirkx/php-js-dom/tree/1.7"
+            },
+            "time": "2023-01-27T00:25:33+00:00"
         },
         {
             "name": "symfony/css-selector",
-            "version": "v3.4.28",
+            "version": "v5.4.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf"
+                "reference": "95f3c7468db1da8cc360b24fa2a26e7cefcb355d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
-                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/95f3c7468db1da8cc360b24fa2a26e7cefcb355d",
+                "reference": "95f3c7468db1da8cc360b24fa2a26e7cefcb355d",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.5.9|>=7.0.8"
+                "php": ">=7.2.5",
+                "symfony/polyfill-php80": "^1.16"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.4-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\CssSelector\\": ""
@@ -114,21 +119,121 @@
             ],
             "authors": [
                 {
-                    "name": "Jean-François Simon",
-                    "email": "jeanfrancois.simon@sensiolabs.com"
-                },
-                {
                     "name": "Fabien Potencier",
                     "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Jean-François Simon",
+                    "email": "jeanfrancois.simon@sensiolabs.com"
                 },
                 {
                     "name": "Symfony Community",
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Symfony CssSelector Component",
+            "description": "Converts CSS selectors to XPath expressions",
             "homepage": "https://symfony.com",
-            "time": "2019-01-16T09:39:14+00:00"
+            "support": {
+                "source": "https://github.com/symfony/css-selector/tree/v5.4.21"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-02-14T08:03:56+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php80",
+            "version": "v1.27.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php80.git",
+                "reference": "7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936",
+                "reference": "7a6ff3f1959bb01aefccb463a0f2cd3d3d2fd936",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.27-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php80\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ion Bazan",
+                    "email": "ion.bazan@gmail.com"
+                },
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.0+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.27.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2022-11-03T14:55:06+00:00"
         }
     ],
     "packages-dev": [],
@@ -138,5 +243,6 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }
