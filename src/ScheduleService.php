@@ -4,6 +4,8 @@ namespace rdx\pathe;
 
 use InvalidArgumentException;
 use rdx\jsdom\Node;
+use Exception;
+use GuzzleHttp\Client as Guzzle;
 
 class ScheduleService {
 
@@ -92,19 +94,27 @@ class ScheduleService {
 	protected function fetchWatchlist() {
 		if ( PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE ) {
 			$url = PATHE_OBJECT_STORE_URL . '/?store=' . PATHE_OBJECT_STORE . '&get=pathe';
-			$json = file_get_contents($url);
-			$json = substr($json, strpos($json, '{'));
-			$data = json_decode($json, true);
-			if ( $data['exists'] ) {
-				$this->watchlist = array_map(function($list) {
-					return array_map([$this, 'getMovieId'], $list);
-				}, $data['value']);
+			$guzzle = new Guzzle(['
+				timeout' => 5,
+			]);
+			try {
+				$rsp = $guzzle->get($url);
+				$json = (string) $rsp->getBody();
+				$json = substr($json, strpos($json, '{'));
+				$data = json_decode($json, true);
+				if ( !empty($data['exists']) ) {
+					$this->watchlist = array_map(function($list) {
+						return array_map([$this, 'getMovieId'], $list);
+					}, $data['value']);
 
-				return true;
+					return true;
+				}
+			}
+			catch (Exception $ex) {
 			}
 		}
 
-		$this->watchlist += ['todo' => [], 'hide' => []];
+		$this->watchlist = ['todo' => [], 'hide' => []];
 
 		return false;
 	}
