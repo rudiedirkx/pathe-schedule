@@ -19,9 +19,10 @@ include 'tpl.header.php';
 
 <p>
 	<a href="./">Today</a> |
-	<a href="?date=tomorrow">Tomorrow</a> |
-	<a href="?date=2+days">+2</a> |
-	<a href="?date=3+days">+3</a>
+	<a href="?date=tomorrow">Tomorrow</a>
+	<? for ($i=2; $i<=7; $i++): ?>
+		| <a href="?date=<?= $i ?>+days">+<?= $i ?></a>
+	<? endfor ?>
 </p>
 
 <h1><a href="<?= html($service->getScheduleUrl()) ?>"><?= html($service->getTitle()) ?></a></h1>
