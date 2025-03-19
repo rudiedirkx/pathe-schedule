@@ -1,0 +1,24 @@
+parameters:
+	level: 1
+	bootstrapFiles:
+		- phpstan.php
+	typeAliases:
+		AssocArray: 'array<string, mixed>'
+	paths:
+		# - ./
+		- src/
+	excludePaths:
+		- vendor/
+	dynamicConstantNames:
+		- ACCESS_TTL
+	treatPhpDocTypesAsCertain: false
+	checkFunctionNameCase: true
+	checkNullables: true
+	# checkExplicitMixed: true
+	# checkImplicitMixed: true
+	reportMaybes: true
+	reportUnmatchedIgnoredErrors: true
+	# ignoreErrors:
+	# 	-
+	# 		path: source/Models/
+	# 		message: "#^Method .+::relate_\\w+\\(\\) has no return type specified#"
