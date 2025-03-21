@@ -7,7 +7,7 @@ require __DIR__ . '/inc.bootstrap.php';
 
 $date = $_GET['date'] ?? 'today';
 
-$service = new ScheduleService('eindhoven', $date, '#\b(relax seat)\b#');
+$service = new ScheduleService('pathe-eindhoven', $date, '#\b(relax seat)\b#');
 $date = $service->getDate();
 
 $movies = $service->getSchedule();
@@ -57,6 +57,11 @@ include 'tpl.header.php';
 <p><a href="stats.php">Stats</a></p>
 
 <details>
+	<summary>Requests (<?= count($service->requests) ?>)</summary>
+	<pre><?= html(print_r($service->requests, true)) ?></pre>
+</details>
+
+<details>
 	<summary>Queries (<?= count($db->queries) ?>)</summary>
-	<pre><? print_r($db->queries) ?></pre>
+	<pre><?= html(print_r($db->queries, true)) ?></pre>
 </details>

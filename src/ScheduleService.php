@@ -2,25 +2,30 @@
 
 namespace rdx\pathe;
 
-use InvalidArgumentException;
-use rdx\jsdom\Node;
+use db_generic;
 use Exception;
 use GuzzleHttp\Client as Guzzle;
+use InvalidArgumentException;
+use rdx\jsdom\Node;
 
 class ScheduleService {
 
-	const DAY_START = '03:00';
+	public const DAY_START = '03:00';
+	protected const KEEP_LABELS = ['soundsessions', 'opera', 'pridenight', 'music', 'imax', 'kleuter', 'arthouse', 'ladiesnight', '4dx', 'classics', 'sneaknight', '3d', '50plus'];
 
-	protected $city;
-	protected $origDate;
-	protected $date;
-	protected $time;
-	protected $removeFromLabel;
-	protected $watchlist;
+	protected db_generic $db;
+	protected Guzzle $guzzle;
 
-	public function __construct( string $city, string $date, string $removeFromLabel ) {
+	protected string $city;
+	protected string $origDate;
+	protected string $date;
+	protected string $time;
+	protected array $watchlist;
+
+	public array $requests = [];
+
+	public function __construct( string $city, string $date ) {
 		$this->city = $city;
-		$this->removeFromLabel = $removeFromLabel;
 
 		$this->date = $date;
 		$this->time = date('H:i');
@@ -38,6 +43,14 @@ class ScheduleService {
 		}
 
 		$this->db = $GLOBALS['db'];
+
+		$this->guzzle = new Guzzle([
+			'timeout' => 5,
+			// 'verify' => false,
+			'headers' => [
+				'User-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+			],
+		]);
 	}
 
 	public function getDate() {
@@ -93,18 +106,17 @@ class ScheduleService {
 
 	protected function fetchWatchlist() {
 		if ( PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE ) {
-			$url = PATHE_OBJECT_STORE_URL . '/?store=' . PATHE_OBJECT_STORE . '&get=pathe';
-			$guzzle = new Guzzle(['
-				timeout' => 5,
-			]);
+			$url = PATHE_OBJECT_STORE_URL . '?store=' . PATHE_OBJECT_STORE . '&get=pathe';
 			try {
-				$rsp = $guzzle->get($url);
+				$this->requests[] = $url;
+				$rsp = $this->guzzle->get($url);
 				$json = (string) $rsp->getBody();
 				$json = substr($json, strpos($json, '{'));
 				$data = json_decode($json, true);
+
 				if ( !empty($data['exists']) ) {
-					$this->watchlist = array_map(function($list) {
-						return array_map([$this, 'getMovieId'], $list);
+					$this->watchlist = array_map(function(array $list) {
+						return array_values(array_filter(array_map($this->getMovieId(...), $list)));
 					}, $data['value']);
 
 					return true;
@@ -164,27 +176,25 @@ class ScheduleService {
 		throw new InvalidArgumentException("Invalid [href] to make movie URL: '$href'");
 	}
 
-	public function getMovieId( $href ) {
+	public function getMovieId( string $href ) : ?int {
+		// 2025
+		if ( preg_match('#/films/[^/]+\-(\d+)(/|$)#', $href, $match) ) {
+			return (int) $match[1];
+		}
+
+		// older
 		if ( preg_match('#^/film/(\d+)/.+#', $href, $match) ) {
-			return $match[1];
+			return (int) $match[1];
 		}
 
-		throw new InvalidArgumentException("Can't extract movie ID from [href]: '$href'");
-	}
-
-	public function getMovieReleaseDate(string $href) : ?string {
-		$url = $this->getMovieUrl($href);
-		$html = @file_get_contents($url);
-		if (!$html) return null;
-		$text = strip_tags($html);
-		if (preg_match('#Release\s*:\s+(\d+)-(\d+)-(\d{4})#', $text, $match)) {
-			return date('Y-m-d', strtotime($match[3] . '-' . $match[2] . '-' . $match[1]));
-		}
 		return null;
 	}
 
-	public function persistMovie( $href, $name ) {
+	public function persistMovie( string $href, string $name, string $releaseDate ) : Movie {
 		$id = $this->getMovieId($href);
+		if ( !$id ) {
+			throw new InvalidArgumentException("Can't extract movie ID from [href]: '$href'");
+		}
 
 		$movie = Movie::first(['pathe_id' => $id]);
 
@@ -199,27 +209,19 @@ class ScheduleService {
 				'name' => $name,
 				'first_fetch' => time(),
 				'last_fetch' => time(),
-			]));
-		}
-
-		if ( !$movie->release_date ) {
-			$releaseDate = $this->getMovieReleaseDate($href);
-			$movie->update([
 				'release_date' => $releaseDate,
-			]);
+			]));
 		}
 
 		return $movie;
 	}
 
-	public function persistShowing( Movie $movie, $startTime, $endTime, $label ) {
+	public function persistShowing( Movie $movie, string $startTime, string $endTime, array $labels ) : Showing {
 		$startTime = self::timePlus24($startTime) ?? $startTime;
 		$endTime = self::timePlus24($endTime) ?? $endTime;
 
-		$label = trim(preg_replace($this->removeFromLabel, '', strtolower($label)));
-		$saveLabel = in_array($label, ['uitverkocht']) ? [] : [
-			'flags' => $label ?: null,
-		];
+		$labels = array_map(strtolower(...), $labels);
+		$labels = array_intersect($labels, self::KEEP_LABELS);
 
 		$showing = Showing::first([
 			'movie_id' => $movie->id,
@@ -228,13 +230,15 @@ class ScheduleService {
 		]);
 
 		if ( $showing ) {
-			$showing->update($saveLabel + [
+			$showing->update([
+				'flags' => implode(' ', $labels),
 				'end_time' => $endTime,
 				'last_fetch' => time(),
 			]);
 		}
 		else {
-			$showing = Showing::find(Showing::insert($saveLabel + [
+			$showing = Showing::find(Showing::insert([
+				'flags' => implode(' ', $labels),
 				'movie_id' => $movie->id,
 				'date' => $this->date,
 				'start_time' => $startTime,
@@ -248,32 +252,53 @@ class ScheduleService {
 	}
 
 	public function fetch() {
-		$url = $this->getScheduleUrl();
-		$html = @file_get_contents($url);
-		if (!$html) return;
-		$crawler = Node::create($html);
+		$url = 'https://www.pathe.nl/api/shows?language=nl';
+		$this->requests[] = $url;
+		$rsp = $this->guzzle->get($url);
+		$json = (string) $rsp->getBody();
+		$data = json_decode($json, true);
+		$movies = [];
+		foreach ($data['shows'] as $show) {
+			$movies[ $show['slug'] ] = $show;
+		}
 
-		$schedule = $crawler->query('section.schedule-simple');
-		if ( !$schedule ) return $this->saveLastFetch();
+		$url = sprintf('https://www.pathe.nl/api/cinema/%s/shows?language=nl', $this->city);
+		$this->requests[] = $url;
+		$rsp = $this->guzzle->get($url);
+		$json = (string) $rsp->getBody();
+		$data = json_decode($json, true);
 
-		$movieNodes = $schedule->children('.schedule-simple__item');
-		foreach ($movieNodes as $movieNode) {
-			$h4 = $movieNode->query('h4');
+		$shows = array_filter($data['shows'], function(array $info) {
+			return isset($info['days'][$this->date]);
+		});
 
-			$href = $h4->query('a')['href'];
-			$href = preg_replace('/[?#].*$/', '', $href);
+		foreach ($shows as $slug => $info) {
+			usleep(1000 * rand(100, 300));
 
-			$name = trim($h4->innerText);
+			$url = sprintf(
+				'https://www.pathe.nl/api/show/%s/showtimes/%s/%s?language=nl',
+				$slug,
+				$this->city,
+				$this->date,
+			);
+			$this->requests[] = $url;
+			$rsp = $this->guzzle->get($url);
+			$json = (string) $rsp->getBody();
+			$times = json_decode($json, true);
 
-			$movie = $this->persistMovie($href, $name);
+			$movie = $this->persistMovie(
+				sprintf('https://www.pathe.nl/nl/films/%s', $slug),
+				$movies[$slug]['title'],
+				max($movies[$slug]['releaseAt']),
+			);
 
-			$times = $movieNode->queryAll('a.schedule-time');
-			foreach ( $times as $timeNode ) {
-				$startTime = trim($timeNode->query('.schedule-time__start')->innerText);
-				$endTime = trim($timeNode->query('.schedule-time__end')->innerText);
-				$label = trim($timeNode->query('.schedule-time__label')->innerText);
-
-				$this->persistShowing($movie, $startTime, $endTime, $label);
+			foreach ($times as $time) {
+				$this->persistShowing(
+					$movie,
+					date('H:i', strtotime($time['time'])),
+					date('H:i', strtotime($time['endTime'])),
+					$time['tags'],
+				);
 			}
 		}
 
@@ -281,7 +306,7 @@ class ScheduleService {
 	}
 
 	static public function timePlus24( $time ) {
-		if ( $time < ScheduleService::DAY_START ) {
+		if ( $time < self::DAY_START ) {
 			list($hour, $minute) = explode(':', $time);
 			$hour += 24;
 			return "$hour:$minute";

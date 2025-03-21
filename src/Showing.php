@@ -4,6 +4,16 @@ namespace rdx\pathe;
 
 use db_generic_model;
 
+/**
+ * @property int $id
+ * @property int $movie_id
+ * @property string $date
+ * @property string $start_time
+ * @property string $end_time
+ * @property string $flags
+ * @property int $first_fetch
+ * @property int $last_fetch
+ */
 class Showing extends db_generic_model {
 
 	static public $_table = 'showings';
