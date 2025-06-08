@@ -104,8 +104,12 @@ class ScheduleService {
 		return $movies;
 	}
 
+	public function hasWatchlist() : bool {
+		return PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE;
+	}
+
 	protected function fetchWatchlist() {
-		if ( PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE ) {
+		if ( $this->hasWatchlist() ) {
 			$url = PATHE_OBJECT_STORE_URL . '?store=' . PATHE_OBJECT_STORE . '&get=pathe';
 			try {
 				$this->requests[] = $url;
@@ -115,9 +119,10 @@ class ScheduleService {
 				$data = json_decode($json, true);
 
 				if ( !empty($data['exists']) ) {
-					$this->watchlist = array_map(function(array $list) {
-						return array_values(array_filter(array_map($this->getMovieId(...), $list)));
-					}, $data['value']);
+					$this->watchlist = $data['value'];
+					// $this->watchlist = array_map(function(array $list) {
+					// 	return array_values(array_filter(array_map($this->getMovieId(...), $list)));
+					// }, $data['value']);
 
 					return true;
 				}
@@ -131,13 +136,29 @@ class ScheduleService {
 		return false;
 	}
 
-	protected function getWatchlistStatus( Movie $movie ) {
-		if ( in_array($movie->pathe_id, $this->watchlist['todo']) ) {
-			return 'todo';
+	public function getWatchlist() : array {
+		return $this->watchlist;
+	}
+
+	protected function getWatchlistStatus( Movie $movie ) : string {
+		foreach (['todo', 'hide'] as $bucket) {
+			foreach ($this->watchlist[$bucket] as $item) {
+				if ($item == $movie->pathe_id) {
+					return $bucket;
+				}
+			}
 		}
 
-		if ( in_array($movie->pathe_id, $this->watchlist['hide']) ) {
-			return 'hide';
+		return '';
+	}
+
+	public function toggleWatchlist( string $bucket, string $patheId ) : void {
+		$method = in_array($patheId, $this->watchlist[$bucket]) ? 'pull' : 'push';
+		$url = sprintf('%s?store=%s&%s=pathe.%s&value="%s"', PATHE_OBJECT_STORE_URL, PATHE_OBJECT_STORE, $method, $bucket, $patheId);
+		$rsp = $this->guzzle->get($url);
+		$json = (string) $rsp->getBody();
+		if (!json_decode($json)) {
+			dd($json);
 		}
 	}
 
@@ -178,7 +199,7 @@ class ScheduleService {
 
 	public function getMovieId( string $href ) : ?int {
 		// 2025
-		if ( preg_match('#/films/[^/]+\-(\d+)(/|$)#', $href, $match) ) {
+		if ( preg_match('#/films/[^/]+\-(\d+)(/|\?|\#|$)#', $href, $match) ) {
 			return (int) $match[1];
 		}
 

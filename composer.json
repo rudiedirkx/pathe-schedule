@@ -6,7 +6,8 @@
         "guzzlehttp/guzzle": "^7.8",
         "rdx/db": "^1.15",
         "rdx/js-dom": "^1.1",
-        "symfony/var-dumper": "^7.0 | ^6.0"
+        "symfony/var-dumper": "^7.0 | ^6.0",
+        "wikimedia/ip-set": "^4.0"
     },
     "autoload": {
         "files": [

@@ -12,6 +12,12 @@ $date = $service->getDate();
 
 $movies = $service->getSchedule();
 
+if (isset($_POST['watchlist'])) {
+	$args = explode(':', $_POST['watchlist'], 2);
+	$service->toggleWatchlist(...$args);
+	return do_redirect($_SERVER['HTTP_REFERER']);
+}
+
 $title = $service->getTitle();
 include 'tpl.header.php';
 
@@ -33,7 +39,15 @@ include 'tpl.header.php';
 			<?= html($movie->movie) ?>
 			(<?= $movie->movie->pretty_release_date ?>)
 			<? if (IMDB_SEARCH_URL): ?>
-				<a class="arrow" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">&#10132;</a>
+				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">🔎</a>
+			<? endif ?>
+			<? if (semidebug() && $service->hasWatchlist()): ?>
+				<form method="post" action>
+					<button class="icon" name="watchlist" value="todo:<?= $movie->movie->pathe_id ?>">❤️</button>
+				</form>
+				<form method="post" action>
+					<button class="icon" name="watchlist" value="hide:<?= $movie->movie->pathe_id ?>">🗑️</button>
+				</form>
 			<? endif ?>
 		</h3>
 		<ul>
@@ -56,12 +70,20 @@ include 'tpl.header.php';
 
 <p><a href="stats.php">Stats</a></p>
 
-<details>
-	<summary>Requests (<?= count($service->requests) ?>)</summary>
-	<pre><?= html(print_r($service->requests, true)) ?></pre>
-</details>
+<? if (semidebug()): ?>
+	<details>
+		<summary>Requests (<?= count($service->requests) ?>)</summary>
+		<pre><?= html(print_r($service->requests, true)) ?></pre>
+	</details>
 
-<details>
-	<summary>Queries (<?= count($db->queries) ?>)</summary>
-	<pre><?= html(print_r($db->queries, true)) ?></pre>
-</details>
+	<details>
+		<summary>Queries (<?= count($db->queries) ?>)</summary>
+		<pre><?= html(print_r($db->queries, true)) ?></pre>
+	</details>
+
+	<? $watchlist = $service->getWatchlist() ?>
+	<details>
+		<summary>Watchlist (<?= count($watchlist['todo']) ?> + <?= count($watchlist['hide']) ?>)</summary>
+		<? dump($watchlist) ?>
+	</details>
+<? endif ?>
