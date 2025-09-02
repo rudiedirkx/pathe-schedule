@@ -160,6 +160,10 @@ class ScheduleService {
 		if (!json_decode($json)) {
 			dd($json);
 		}
+
+		if ($bucket == 'hide' and in_array($patheId, $this->watchlist['todo'])) {
+			$this->toggleWatchlist('todo', $patheId);
+		}
 	}
 
 	public function getCacheAge() {

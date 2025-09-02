@@ -37,16 +37,15 @@ a {
 .movie h3 a {
 	color: inherit;
 }
-.movie form {
-	display: inline;
-}
 .movie a.icon {
 	text-decoration: none;
+	margin-left: 0.5rem;
 }
 .movie button.icon {
 	background: transparent;
 	padding: 0;
 	border: 0;
+	margin-left: 0.5rem;
 }
 .movie ul,
 .movie.hide h3 {

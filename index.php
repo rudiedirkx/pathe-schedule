@@ -15,7 +15,9 @@ $movies = $service->getSchedule();
 if (isset($_POST['watchlist'])) {
 	$args = explode(':', $_POST['watchlist'], 2);
 	$service->toggleWatchlist(...$args);
-	return do_redirect($_SERVER['HTTP_REFERER']);
+	header('Content-type: application/json; charset=utf-8');
+	echo '{"ok": true}';
+	exit;
 }
 
 $title = $service->getTitle();
@@ -25,9 +27,9 @@ include 'tpl.header.php';
 
 <p>
 	<a href="./">Today</a> |
-	<a href="?date=tomorrow">Tomorrow</a>
+	<a href="?date=<?= date('Y-m-d', strtotime('tomorrow')) ?>">Tomorrow</a>
 	<? for ($i=2; $i<=7; $i++): ?>
-		| <a href="?date=<?= $i ?>+days">+<?= $i ?></a>
+		| <a href="?date=<?= date('Y-m-d', strtotime("+$i days")) ?>"><?= date('D', strtotime("+$i days")) ?></a>
 	<? endfor ?>
 </p>
 
@@ -42,12 +44,8 @@ include 'tpl.header.php';
 				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">🔎</a>
 			<? endif ?>
 			<? if (semidebug() && $service->hasWatchlist()): ?>
-				<form method="post" action>
-					<button class="icon" name="watchlist" value="todo:<?= $movie->movie->pathe_id ?>">❤️</button>
-				</form>
-				<form method="post" action>
-					<button class="icon" name="watchlist" value="hide:<?= $movie->movie->pathe_id ?>">🗑️</button>
-				</form>
+				<button class="icon" name="watchlist" value="todo:<?= $movie->movie->pathe_id ?>">❤️</button>
+				<button class="icon" name="watchlist" value="hide:<?= $movie->movie->pathe_id ?>">🗑️</button>
 			<? endif ?>
 		</h3>
 		<ul>
@@ -69,6 +67,21 @@ include 'tpl.header.php';
 <p>Cache is <?= $service->getCacheAge() ?> sec old.</p>
 
 <p><a href="stats.php">Stats</a></p>
+
+<script>
+Array.from(document.querySelectorAll('button[name="watchlist"]')).forEach(btn => btn.addEventListener('click', function(e) {
+	e.preventDefault();
+	const data = new FormData();
+	data.append(this.name, this.value);
+	fetch('?', {
+		method: 'post',
+		body: data,
+	}).then(rsp => rsp.json()).then(data => {
+		// console.log(data);
+		location.reload();
+	});
+}));
+</script>
 
 <? if (semidebug()): ?>
 	<details>
