@@ -27,19 +27,18 @@ class ScheduleService {
 	public function __construct( string $city, string $date ) {
 		$this->city = $city;
 
-		$this->date = $date;
 		$this->time = date('H:i');
 
-		if ($this->time < self::DAY_START) {
-			$this->origDate = date('Y-m-d', strtotime($this->date));
-			$this->date = date('Y-m-d', strtotime('-1 days', strtotime($this->date)));
+		if ($date == 'today' && $this->time < self::DAY_START) {
+			$this->origDate = date('Y-m-d', strtotime($date));
+			$this->date = date('Y-m-d', strtotime('-1 days', strtotime($date)));
 
 			list($hour, $minute) = explode(':', $this->time);
 			$hour += 24;
 			$this->time = "$hour:$minute";
 		}
 		else {
-			$this->date = $this->origDate = date('Y-m-d', strtotime($this->date));
+			$this->date = $this->origDate = date('Y-m-d', strtotime($date));
 		}
 
 		$this->db = $GLOBALS['db'];
@@ -55,6 +54,13 @@ class ScheduleService {
 
 	public function getDate() {
 		return $this->date;
+	}
+
+	public function getDatesBaseUtc() {
+		if (date('H:i') < self::DAY_START) {
+			return strtotime('-24 hours');
+		}
+		return time();
 	}
 
 	public function getTitle() {

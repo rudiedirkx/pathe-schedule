@@ -23,13 +23,16 @@ if (isset($_POST['watchlist'])) {
 $title = $service->getTitle();
 include 'tpl.header.php';
 
+$datesBaseUtc = $service->getDatesBaseUtc();
+
 ?>
 
 <p>
-	<a href="./">Today</a> |
-	<a href="?date=<?= date('Y-m-d', strtotime('tomorrow')) ?>">Tomorrow</a>
-	<? for ($i=2; $i<=7; $i++): ?>
-		| <a href="?date=<?= date('Y-m-d', strtotime("+$i days")) ?>"><?= date('D', strtotime("+$i days")) ?></a>
+	<a href="./">Today</a>
+	<? for ($i=1; $i<=7; $i++):
+		$utc = strtotime("+$i days", $datesBaseUtc);
+		?>
+		| <a href="?date=<?= date('Y-m-d', $utc) ?>"><?= date('D', $utc) ?></a>
 	<? endfor ?>
 </p>
 
