@@ -97,7 +97,7 @@ Array.from(document.querySelectorAll('button[name="watchlist"]')).forEach(btn =>
 		<pre><?= html(print_r($db->queries, true)) ?></pre>
 	</details>
 
-	<? $watchlist = $service->getWatchlist() ?>
+	<? $watchlist = $service->getPrettyWatchlist() ?>
 	<details>
 		<summary>Watchlist (<?= count($watchlist['todo']) ?> + <?= count($watchlist['hide']) ?>)</summary>
 		<? dump($watchlist) ?>

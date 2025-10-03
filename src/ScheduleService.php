@@ -146,6 +146,17 @@ class ScheduleService {
 		return $this->watchlist;
 	}
 
+	public function getPrettyWatchlist() : array {
+		$allIds = array_merge(...array_values($this->getWatchlist()));
+		$movies = Movie::all(['pathe_id' => $allIds]);
+		$movies = array_column($movies, 'name', 'pathe_id');
+		return array_map(function(array $ids) use ($movies) {
+			return array_map(function(string $id) use ($movies) {
+				return $movies[$id] ?? "?";
+			}, array_combine($ids, $ids));
+		}, $this->watchlist);
+	}
+
 	protected function getWatchlistStatus( Movie $movie ) : string {
 		foreach (['todo', 'hide'] as $bucket) {
 			foreach ($this->watchlist[$bucket] as $item) {
