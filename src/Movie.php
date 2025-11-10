@@ -16,6 +16,11 @@ class Movie extends db_generic_model {
 
 	static public $_table = 'movies';
 
+	protected function relate_last_showing_date() {
+		return $this->to_aggregate('showings', 'max(date)', 'movie_id')
+			->caster('strval');
+	}
+
 	protected function get_pretty_release_date() {
 		return date('d-M-Y', strtotime($this->release_date));
 	}

@@ -149,10 +149,15 @@ class ScheduleService {
 	public function getPrettyWatchlist() : array {
 		$allIds = array_merge(...array_values($this->getWatchlist()));
 		$movies = Movie::all(['pathe_id' => $allIds]);
-		$movies = array_column($movies, 'name', 'pathe_id');
+		Movie::eagers($movies, ['last_showing_date']);
+		$movies = array_reduce($movies, function(array $list, Movie $movie) {
+			return $list + [$movie->pathe_id => $movie];
+		}, []);
 		return array_map(function(array $ids) use ($movies) {
 			return array_map(function(string $id) use ($movies) {
-				return $movies[$id] ?? "?";
+				if (!isset($movies[$id])) return '?';
+				$movie = $movies[$id];
+				return sprintf('%s (%s - %s)', $movie, $movie->release_date, $movie->last_showing_date);
 			}, array_combine($ids, $ids));
 		}, $this->watchlist);
 	}
