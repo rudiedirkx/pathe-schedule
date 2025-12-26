@@ -21,6 +21,7 @@ class ScheduleService {
 	protected string $date;
 	protected string $time;
 	protected array $watchlist;
+	protected int $lastFetch;
 
 	public array $requests = [];
 
@@ -110,6 +111,15 @@ class ScheduleService {
 		return $movies;
 	}
 
+	public function movieIsOutdated(Movie $movie) : bool {
+		return $movie->last_fetch + 120 < $this->getLastFetch();
+	}
+
+	public function showingIsOutdated(Showing $showing) : bool {
+		if ($this->time >= $showing->start_time) return false;
+		return $showing->last_fetch + 120 < $this->getLastFetch();
+	}
+
 	public function hasWatchlist() : bool {
 		return PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE;
 	}
@@ -188,16 +198,17 @@ class ScheduleService {
 		}
 	}
 
-	public function getCacheAge() {
-		return time() - $this->getLastFetch();
+	public function getCacheAgeMinutes() {
+		return round((time() - $this->getLastFetch()) / 60);
 	}
 
 	public function getLastFetch() {
-		return $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
+		return $this->lastFetch ??= $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
 	}
 
-	protected function saveLastFetch() {
-		return $this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => time()]);
+	protected function saveLastFetch() : void {
+		$this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => time()]);
+		unset($this->lastFetch);
 	}
 
 	public function needsFetch() {

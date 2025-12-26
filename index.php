@@ -41,8 +41,13 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 <? foreach ($movies as $movie): ?>
 	<div class="movie <?= $movie->status ?>">
 		<h3>
-			<?= html($movie->movie) ?>
-			(<?= $movie->movie->pretty_release_date ?>)
+			<span title="Last fetch: <?= date('Y-m-d H:i', $movie->movie->last_fetch) ?>">
+				<?= html($movie->movie) ?>
+				(<?= $movie->movie->pretty_release_date ?>)
+				<? if ($service->movieIsOutdated($movie->movie)): ?>
+					⚠️
+				<? endif ?>
+			</span>
 			<? if (IMDB_SEARCH_URL): ?>
 				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">🔎</a>
 			<? endif ?>
@@ -53,10 +58,13 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 		</h3>
 		<ul>
 			<? foreach ($movie->showings as $showing): ?>
-				<li>
+				<li title="Last fetch: <?= date('Y-m-d H:i', $showing->last_fetch) ?>">
 					<?= html($showing->orig_start_time) ?> - <?= html($showing->orig_end_time) ?>
 					<? if ($showing->flags): ?>
 						| <?= html(strtoupper($showing->flags)) ?>
+					<? endif ?>
+					<? if ($service->showingIsOutdated($showing)): ?>
+						⚠️
 					<? endif ?>
 					<?if ($showing->progress > 0): ?>
 						<div class="progress"><div class="done" style="width: <?= $showing->progress ?>%"></div></div>
@@ -67,7 +75,9 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 	</div>
 <? endforeach ?>
 
-<p>Cache is <?= $service->getCacheAge() ?> sec old.</p>
+<p title="<?= date('Y-m-d H:i', $service->getLastFetch()) ?>">
+	Cache is <?= $service->getCacheAgeMinutes() ?> mins old.
+</p>
 
 <p><a href="stats.php">Stats</a></p>
 
