@@ -203,12 +203,12 @@ class ScheduleService {
 	}
 
 	public function getLastFetch() {
-		return $this->lastFetch ??= $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
+		return $this->lastFetch ??= (int) $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
 	}
 
 	protected function saveLastFetch() : void {
-		$this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => time()]);
-		unset($this->lastFetch);
+		$this->lastFetch = time();
+		$this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => $this->lastFetch]);
 	}
 
 	public function needsFetch() {
