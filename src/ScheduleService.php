@@ -11,7 +11,22 @@ use rdx\jsdom\Node;
 class ScheduleService {
 
 	public const DAY_START = '03:00';
-	protected const KEEP_LABELS = ['soundsessions', 'opera', 'pridenight', 'music', 'imax', 'kleuter', 'arthouse', 'ladiesnight', '4dx', 'classics', 'sneaknight', '3d', '50plus'];
+	protected const KEEP_LABELS = [
+		'3d',
+		'4dx',
+		'50plus',
+		'arthouse',
+		'classics',
+		'film+',
+		'imax',
+		'kleuter',
+		'ladiesnight',
+		'music',
+		'opera',
+		'pridenight',
+		'sneaknight',
+		'soundsessions',
+	];
 
 	protected db_generic $db;
 	protected Guzzle $guzzle;
@@ -326,9 +341,9 @@ class ScheduleService {
 		$json = (string) $rsp->getBody();
 		$data = json_decode($json, true);
 
-		$shows = array_filter($data['shows'], function(array $info) {
-			return isset($info['days'][$this->date]);
-		});
+		$shows = array_filter(array_map(function(array $info) {
+			return $info['days'][$this->date] ?? null;
+		}, $data['shows']));
 
 		foreach ($shows as $slug => $info) {
 			usleep(1000 * rand(100, 300));
@@ -355,7 +370,7 @@ class ScheduleService {
 					$movie,
 					date('H:i', strtotime($time['time'])),
 					date('H:i', strtotime($time['endTime'])),
-					$time['tags'],
+					array_filter([...$time['tags'], $info['flag'] ?? '']),
 				);
 			}
 		}
