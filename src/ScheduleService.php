@@ -293,7 +293,7 @@ class ScheduleService {
 		$startTime = self::timePlus24($startTime) ?? $startTime;
 		$endTime = self::timePlus24($endTime) ?? $endTime;
 
-		$labels = array_map(strtolower(...), $labels);
+		$labels = array_unique(array_map(strtolower(...), $labels));
 		$labels = array_intersect($labels, self::KEEP_LABELS);
 
 		$showing = Showing::first([
