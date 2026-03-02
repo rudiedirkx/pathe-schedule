@@ -89,7 +89,7 @@ class ScheduleService {
 		}
 
 		if ( $this->origDate == date('Y-m-d') ) {
-			$startTime = $this->time;
+			$startTime = date('H:i', strtotime('-30 minutes', strtotime($this->time)));
 			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->date, $startTime]);
 		}
 		else {
