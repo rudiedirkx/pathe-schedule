@@ -11,6 +11,7 @@ use rdx\jsdom\Node;
 class ScheduleService {
 
 	public const DAY_START = '03:00';
+	protected const SHOW_MINS_AFTER_END = 30;
 	protected const KEEP_LABELS = [
 		'3d',
 		'4dx',
@@ -88,9 +89,10 @@ class ScheduleService {
 			$this->fetch();
 		}
 
-		if ( $this->origDate == date('Y-m-d') ) {
-			$startTime = date('H:i', strtotime('-30 minutes', strtotime($this->time)));
-			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->date, $startTime]);
+		if ( $this->date < $this->origDate ) {
+			$time = date('H:i', strtotime('-' . self::SHOW_MINS_AFTER_END . ' minutes', strtotime($this->time)));
+			$time = self::timePlus24($time) ?? $time;
+			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->date, $time]);
 		}
 		else {
 			$showings = Showing::all('date = ? ORDER BY start_time ASC', [$this->date]);
