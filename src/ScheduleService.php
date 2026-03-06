@@ -33,8 +33,10 @@ class ScheduleService {
 	protected Guzzle $guzzle;
 
 	protected string $city;
-	protected string $origDate;
-	protected string $date;
+	// protected string $todayRealDate;
+	protected string $todayScheduleDate;
+	protected string $realDate;
+	protected string $scheduleDate;
 	protected string $time;
 	protected array $watchlist;
 	protected int $lastFetch;
@@ -46,16 +48,17 @@ class ScheduleService {
 
 		$this->time = date('H:i');
 
-		if ($date == 'today' && $this->time < self::DAY_START) {
-			$this->origDate = date('Y-m-d', strtotime($date));
-			$this->date = date('Y-m-d', strtotime('-1 days', strtotime($date)));
+		// $this->todayRealDate = date('Y-m-d');
+		$this->todayScheduleDate = date('Y-m-d', strtotime($this->time < self::DAY_START ? '-1 days' : 'now'));
 
-			list($hour, $minute) = explode(':', $this->time);
-			$hour += 24;
-			$this->time = "$hour:$minute";
+		if ($date == 'today' && $this->time < self::DAY_START) {
+			$this->realDate = date('Y-m-d', strtotime($date));
+			$this->scheduleDate = date('Y-m-d', strtotime('-1 days', strtotime($date)));
+
+			$this->time = self::timePlus24($this->time);
 		}
 		else {
-			$this->date = $this->origDate = date('Y-m-d', strtotime($date));
+			$this->scheduleDate = $this->realDate = date('Y-m-d', strtotime($date));
 		}
 
 		$this->db = $GLOBALS['db'];
@@ -70,7 +73,7 @@ class ScheduleService {
 	}
 
 	public function getDate() {
-		return $this->date;
+		return $this->scheduleDate;
 	}
 
 	public function getDatesBaseUtc() {
@@ -81,7 +84,7 @@ class ScheduleService {
 	}
 
 	public function getTitle() {
-		return date('l d-M', strtotime($this->date));
+		return date('l d-M', strtotime($this->scheduleDate));
 	}
 
 	public function getSchedule() {
@@ -89,13 +92,13 @@ class ScheduleService {
 			$this->fetch();
 		}
 
-		if ( $this->date < $this->origDate ) {
+		if ( $this->scheduleDate == $this->todayScheduleDate ) {
 			$time = date('H:i', strtotime('-' . self::SHOW_MINS_AFTER_END . ' minutes', strtotime($this->time)));
 			$time = self::timePlus24($time) ?? $time;
-			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->date, $time]);
+			$showings = Showing::all("date = ? AND end_time >= ? ORDER BY start_time ASC", [$this->scheduleDate, $time]);
 		}
 		else {
-			$showings = Showing::all('date = ? ORDER BY start_time ASC', [$this->date]);
+			$showings = Showing::all('date = ? ORDER BY start_time ASC', [$this->scheduleDate]);
 		}
 		Showing::eager('movie', $showings);
 
@@ -220,12 +223,12 @@ class ScheduleService {
 	}
 
 	public function getLastFetch() {
-		return $this->lastFetch ??= (int) $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->date]);
+		return $this->lastFetch ??= (int) $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->scheduleDate]);
 	}
 
 	protected function saveLastFetch() : void {
 		$this->lastFetch = time();
-		$this->db->insert('fetches', ['date' => $this->date, 'fetched_on' => $this->lastFetch]);
+		$this->db->insert('fetches', ['date' => $this->scheduleDate, 'fetched_on' => $this->lastFetch]);
 	}
 
 	public function needsFetch() {
@@ -239,7 +242,7 @@ class ScheduleService {
 
 	public function getScheduleUrl() {
 		$base = $this->getBaseUrl();
-		return "$base/bioscoop/{$this->city}?date={$this->date}";
+		return "$base/bioscoop/{$this->city}?date={$this->scheduleDate}";
 	}
 
 	public function getMovieUrl( $href ) {
@@ -300,7 +303,7 @@ class ScheduleService {
 
 		$showing = Showing::first([
 			'movie_id' => $movie->id,
-			'date' => $this->date,
+			'date' => $this->scheduleDate,
 			'start_time' => $startTime,
 		]);
 
@@ -315,7 +318,7 @@ class ScheduleService {
 			$showing = Showing::find(Showing::insert([
 				'flags' => implode(' ', $labels),
 				'movie_id' => $movie->id,
-				'date' => $this->date,
+				'date' => $this->scheduleDate,
 				'start_time' => $startTime,
 				'end_time' => $endTime,
 				'first_fetch' => time(),
@@ -344,7 +347,7 @@ class ScheduleService {
 		$data = json_decode($json, true);
 
 		$shows = array_filter(array_map(function(array $info) {
-			return $info['days'][$this->date] ?? null;
+			return $info['days'][$this->scheduleDate] ?? null;
 		}, $data['shows']));
 
 		foreach ($shows as $slug => $info) {
@@ -354,7 +357,7 @@ class ScheduleService {
 				'https://www.pathe.nl/api/show/%s/showtimes/%s/%s?language=nl',
 				$slug,
 				$this->city,
-				$this->date,
+				$this->scheduleDate,
 			);
 			$this->requests[] = $url;
 			$rsp = $this->guzzle->get($url);
