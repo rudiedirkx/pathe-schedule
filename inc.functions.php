@@ -12,9 +12,11 @@ function semidebug() : bool {
 
 	if (empty($_SERVER['REMOTE_ADDR'])) return $cache = false;
 
+	if (($_SESSION['semidebug'] ?? false) === true) return $cache = true;
+
 	$set = new IPSet(ADMIN_IPS);
 	$ip = $_SERVER['REMOTE_ADDR'];
-	return $debug = $set->match($ip);
+	return $_SESSION['semidebug'] = $debug = $set->match($ip);
 }
 
 function html( ?string $text ) : string {
