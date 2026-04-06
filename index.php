@@ -44,9 +44,6 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 			<span title="Last fetch: <?= date('Y-m-d H:i', $movie->movie->last_fetch) ?>">
 				<?= html($movie->movie) ?>
 				(<?= $movie->movie->pretty_release_date ?>)
-				<? if ($service->movieIsOutdated($movie->movie)): ?>
-					⚠️
-				<? endif ?>
 			</span>
 			<? if (IMDB_SEARCH_URL): ?>
 				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">🔎</a>

@@ -131,10 +131,6 @@ class ScheduleService {
 		return $movies;
 	}
 
-	public function movieIsOutdated(Movie $movie) : bool {
-		return $movie->last_fetch + 120 < $this->getLastFetch();
-	}
-
 	public function showingIsOutdated(Showing $showing) : bool {
 		if ($this->time >= $showing->start_time) return false;
 		return $showing->last_fetch + 120 < $this->getLastFetch();
