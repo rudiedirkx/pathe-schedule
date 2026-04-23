@@ -24,6 +24,7 @@ class ScheduleService {
 		'ladiesnight',
 		'music',
 		'opera',
+		'pause',
 		'pridenight',
 		'sneaknight',
 		'soundsessions',
