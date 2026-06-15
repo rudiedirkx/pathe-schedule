@@ -25,6 +25,10 @@ class Movie extends db_generic_model {
 		return date('d-M-Y', strtotime($this->release_date));
 	}
 
+	protected function get_searchable_name() {
+		return trim(explode('(', $this->name)[0]);
+	}
+
 	public function __toString() {
 		return (string) $this->name;
 	}

@@ -46,7 +46,7 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 				(<?= $movie->movie->pretty_release_date ?>)
 			</span>
 			<? if (IMDB_SEARCH_URL): ?>
-				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie)) ?>">🔎</a>
+				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie->searchable_name)) ?>">🔎</a>
 			<? endif ?>
 			<? if (semidebug() && $service->hasWatchlist()): ?>
 				<button class="icon" name="watchlist" value="todo:<?= $movie->movie->pathe_id ?>">❤️</button>
