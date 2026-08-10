@@ -265,7 +265,7 @@ class ScheduleService {
 		return null;
 	}
 
-	public function persistMovie( string $href, string $name, string $releaseDate ) : Movie {
+	public function persistMovie( string $href, string $name, string $releaseDate, ?string $lastKnownDate ) : Movie {
 		$id = $this->getMovieId($href);
 		if ( !$id ) {
 			throw new InvalidArgumentException("Can't extract movie ID from [href]: '$href'");
@@ -276,6 +276,7 @@ class ScheduleService {
 		if ( $movie ) {
 			$movie->update([
 				'last_fetch' => time(),
+				'last_known_date' => $lastKnownDate,
 			]);
 		}
 		else {
@@ -285,6 +286,7 @@ class ScheduleService {
 				'first_fetch' => time(),
 				'last_fetch' => time(),
 				'release_date' => $releaseDate,
+				'last_known_date' => $lastKnownDate,
 			]));
 		}
 
@@ -343,6 +345,10 @@ class ScheduleService {
 		$json = (string) $rsp->getBody();
 		$data = json_decode($json, true);
 
+		$lastDays = array_map(function(array $info) {
+			return max(array_keys($info['days']));
+		}, $data['shows']);
+
 		$shows = array_filter(array_map(function(array $info) {
 			return $info['days'][$this->scheduleDate] ?? null;
 		}, $data['shows']));
@@ -365,6 +371,7 @@ class ScheduleService {
 				sprintf('https://www.pathe.nl/nl/films/%s', $slug),
 				$movies[$slug]['title'],
 				max($movies[$slug]['releaseAt']),
+				$lastDays[$slug] ?? null,
 			);
 
 			foreach ($times as $time) {

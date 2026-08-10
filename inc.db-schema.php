@@ -4,7 +4,7 @@ use rdx\pathe\ScheduleService;
 use rdx\pathe\Showing;
 
 return [
-	'version' => 4,
+	'version' => 5,
 	'tables' => [
 		'fetches' => [
 			'id' => ['pk' => true],
@@ -16,6 +16,7 @@ return [
 			'pathe_id',
 			'name',
 			'release_date' => ['type' => 'date'],
+			'last_known_date' => ['type' => 'date'],
 			'first_fetch' => ['unsigned' => true, 'default' => 0],
 			'last_fetch' => ['unsigned' => true, 'default' => 0],
 		],

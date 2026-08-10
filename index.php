@@ -43,7 +43,7 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 		<h3>
 			<span title="Last fetch: <?= date('Y-m-d H:i', $movie->movie->last_fetch) ?>">
 				<?= html($movie->movie) ?>
-				(<?= $movie->movie->pretty_release_date ?>)
+				(<?= $movie->movie->pretty_release_date ?> - <?= $movie->movie->pretty_last_known_date ?>)
 			</span>
 			<? if (IMDB_SEARCH_URL): ?>
 				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie->searchable_name)) ?>">🔎</a>

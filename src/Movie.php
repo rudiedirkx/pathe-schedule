@@ -9,6 +9,7 @@ use db_generic_model;
  * @property int $pathe_id
  * @property string $name
  * @property string $release_date
+ * @property ?string $last_known_date
  * @property int $first_fetch
  * @property int $last_fetch
  */
@@ -23,6 +24,10 @@ class Movie extends db_generic_model {
 
 	protected function get_pretty_release_date() {
 		return date('d-M-Y', strtotime($this->release_date));
+	}
+
+	protected function get_pretty_last_known_date() {
+		return $this->last_known_date ? date('d-M-Y', strtotime($this->last_known_date)) : '?';
 	}
 
 	protected function get_searchable_name() {
