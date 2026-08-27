@@ -15,18 +15,32 @@ $dates = db()->fetch_first("select min(date) first, max(date) last from fetches 
 $numMovies = db()->select_one('movies', 'count(1)', '1');
 $numShowings = db()->select_one('showings', 'count(1)', '1');
 /** @var array<string, int> */
-$rawFlags = db()->select_fields('showings', 'flags, count(1) num', "1 GROUP BY flags");
+$rawFlags = db()->fetch("SELECT strftime('%Y', date) year, flags, COUNT(1) num FROM showings GROUP BY year, flags");
+// dd($rawFlags);
 
-/** @var array<string, int> $flags */
-$flags = [];
-foreach ($rawFlags as $flag => $num) {
-	$flag = preg_replace('#\bnacht (\d+[ -](?:\w+ )?op \d+[ -]\w+)#', 'nacht X op Y', $flag);
-	$flags[$flag] ??= 0;
-	$flags[$flag] += $num;
+/** @var array<int, array<string, int>> $flags */
+$flagCounts = [];
+foreach ($rawFlags as $row) {
+	$flag = preg_replace('#\bnacht (\d+[ -](?:\w+ )?op \d+[ -]\w+)#', 'nacht X op Y', strtolower($row->flags ?? ''));
+	$flagCounts[$row->year] ??= [];
+	$flagCounts[$row->year][$flag] ??= 0;
+	$flagCounts[$row->year][$flag] += $row->num;
 }
-arsort($flags, SORT_NUMERIC);
+krsort($flagCounts, SORT_NUMERIC);
+
+$flagNames = array_unique(array_merge(...array_values(array_map(fn(array $flags) => array_keys($flags), $flagCounts))));
+sort($flagNames);
 
 ?>
+<style>
+	th:first-child {
+		text-align: right;
+	}
+	th + th,
+	th ~ td {
+		text-align: center;
+	}
+</style>
 
 <dl>
 	<dt>Fetches</dt>
@@ -42,5 +56,26 @@ arsort($flags, SORT_NUMERIC);
 	<dd><?= number_format($numShowings, 0, '.', ' ') ?></dd>
 
 	<dt>Showing flags</dt>
-	<dd><? foreach ($flags as $flag => $used): ?><?= $flag ?: '&lt;none&gt;' ?>: <?= $used ?><br><? endforeach ?></dd>
+	<dd>
+		<table cellpadding="4" cellspacing="0" border="1">
+			<thead>
+				<tr>
+					<th></th>
+					<? foreach (array_keys($flagCounts) as $year): ?>
+						<th><?= $year ?></th>
+					<? endforeach ?>
+				</tr>
+			</thead>
+			<tbody>
+				<? foreach ($flagNames as $flag): ?>
+					<tr>
+						<th><?= html($flag ?: '<none>') ?></th>
+						<? foreach (array_keys($flagCounts) as $year): ?>
+							<td><?= $flagCounts[$year][$flag] ?? '' ?></td>
+						<? endforeach ?>
+					</tr>
+				<? endforeach ?>
+			</tbody>
+		</table>
+	</dd>
 </dl>
