@@ -7,7 +7,7 @@ require __DIR__ . '/inc.bootstrap.php';
 
 $date = $_GET['date'] ?? 'today';
 
-$service = new ScheduleService('pathe-eindhoven', $date, '#\b(relax seat)\b#');
+$service = new ScheduleService('pathe-eindhoven', $date);
 $date = $service->getDate();
 
 $movies = $service->getSchedule();
@@ -43,7 +43,7 @@ $datesBaseUtc = $service->getDatesBaseUtc();
 		<h3>
 			<span title="Last fetch: <?= date('Y-m-d H:i', $movie->movie->last_fetch) ?>">
 				<?= html($movie->movie) ?>
-				(<?= $movie->movie->pretty_release_date ?> - <?= $movie->movie->pretty_last_known_date ?>)
+				(<?= $movie->movie->pretty_release_date ?>, <?= $movie->movie->getMoreDaysAfter($date) ?>)
 			</span>
 			<? if (IMDB_SEARCH_URL): ?>
 				<a class="icon" target="_blank" href="<?= sprintf(IMDB_SEARCH_URL, urlencode($movie->movie->searchable_name)) ?>">🔎</a>
@@ -106,7 +106,7 @@ Array.from(document.querySelectorAll('button[name="watchlist"]')).forEach(btn =>
 	</details>
 
 	<details>
-		<summary>Queries (<?= count($db->queries) ?>)</summary>
-		<pre><?= html(print_r($db->queries, true)) ?></pre>
+		<summary>Queries (<?= count(db()->queries) ?>)</summary>
+		<pre><?= html(print_r(db()->queries, true)) ?></pre>
 	</details>
 <? endif ?>

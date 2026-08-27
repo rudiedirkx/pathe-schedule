@@ -18,15 +18,15 @@ class Showing extends db_generic_model {
 
 	static public $_table = 'showings';
 
-	protected function get_orig_start_time() {
+	protected function get_orig_start_time() : string {
 		return ScheduleService::timeMinus24($this->start_time) ?? $this->start_time;
 	}
 
-	protected function get_orig_end_time() {
+	protected function get_orig_end_time() : string {
 		return ScheduleService::timeMinus24($this->end_time) ?? $this->end_time;
 	}
 
-	protected function get_progress() {
+	protected function get_progress() : int {
 		$now = date('Y-m-d H:i:s');
 
 		$start = "$this->date $this->start_time";
@@ -47,18 +47,18 @@ class Showing extends db_generic_model {
 		}
 
 		$start = explode(':', $this->start_time);
-		$start = 60 * $start[0] + $start[1];
+		$start = 60 * (int) $start[0] + (int) $start[1];
 
 		$end = explode(':', $this->end_time);
-		$end = 60 * $end[0] + $end[1];
+		$end = 60 * (int) $end[0] + (int) $end[1];
 
 		$now = ScheduleService::timePlus24(date('H:i')) ?? date('H:i');
 		$now = explode(':', $now);
-		$now = 60 * $now[0] + $now[1];
+		$now = 60 * (int) $now[0] + (int) $now[1];
 
 // var_dump($start, $end, $now);
 
-		return round(($now - $start) / ($end - $start) * 100);
+		return (int) round(($now - $start) / ($end - $start) * 100);
 	}
 
 	protected function relate_movie() {

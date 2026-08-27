@@ -27,3 +27,7 @@ function do_redirect( string $path ) : never {
 	header('Location: ' . $path);
 	exit;
 }
+
+function db() : db_generic {
+	return $GLOBALS['db'];
+}

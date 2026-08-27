@@ -39,9 +39,11 @@ class ScheduleService {
 	protected string $realDate;
 	protected string $scheduleDate;
 	protected string $time;
+	/** @var array<string, list<string>> */
 	protected array $watchlist;
 	protected int $lastFetch;
 
+	/** @var list<string> */
 	public array $requests = [];
 
 	public function __construct( string $city, string $date ) {
@@ -73,22 +75,25 @@ class ScheduleService {
 		]);
 	}
 
-	public function getDate() {
+	public function getDate() : string {
 		return $this->scheduleDate;
 	}
 
-	public function getDatesBaseUtc() {
+	public function getDatesBaseUtc() : int {
 		if (date('H:i') < self::DAY_START) {
 			return strtotime('-24 hours');
 		}
 		return time();
 	}
 
-	public function getTitle() {
+	public function getTitle() : string {
 		return date('l d-M', strtotime($this->scheduleDate));
 	}
 
-	public function getSchedule() {
+	/**
+	 * @return list<ScheduleMovie>
+	 */
+	public function getSchedule() : array {
 		if ( $this->needsFetch() ) {
 			$this->fetch();
 		}
@@ -141,7 +146,7 @@ class ScheduleService {
 		return PATHE_OBJECT_STORE_URL && PATHE_OBJECT_STORE;
 	}
 
-	protected function fetchWatchlist() {
+	protected function fetchWatchlist() : bool {
 		if ( $this->hasWatchlist() ) {
 			$url = PATHE_OBJECT_STORE_URL . '?store=' . PATHE_OBJECT_STORE . '&get=pathe';
 			try {
@@ -149,6 +154,7 @@ class ScheduleService {
 				$rsp = $this->guzzle->get($url);
 				$json = (string) $rsp->getBody();
 				$json = substr($json, strpos($json, '{'));
+				/** @var AssocArray $data */
 				$data = json_decode($json, true);
 
 				if ( !empty($data['exists']) ) {
@@ -169,14 +175,21 @@ class ScheduleService {
 		return false;
 	}
 
+	/**
+	 * @return array<string, list<string>>
+	 */
 	public function getWatchlist() : array {
 		return $this->watchlist;
 	}
 
+	/**
+	 * @return array<string, array<string, string>>
+	 */
 	public function getPrettyWatchlist() : array {
 		$allIds = array_merge(...array_values($this->getWatchlist()));
 		$movies = Movie::all(['pathe_id' => $allIds]);
 		Movie::eagers($movies, ['last_showing_date']);
+		/** @var array<string, Movie> $movies */
 		$movies = array_reduce($movies, function(array $list, Movie $movie) {
 			return $list + [$movie->pathe_id => $movie];
 		}, []);
@@ -215,11 +228,11 @@ class ScheduleService {
 		}
 	}
 
-	public function getCacheAgeMinutes() {
-		return round((time() - $this->getLastFetch()) / 60);
+	public function getCacheAgeMinutes() : int {
+		return (int) round((time() - $this->getLastFetch()) / 60);
 	}
 
-	public function getLastFetch() {
+	public function getLastFetch() : int {
 		return $this->lastFetch ??= (int) $this->db->max('fetches', 'fetched_on', 'date = ?', [$this->scheduleDate]);
 	}
 
@@ -228,21 +241,21 @@ class ScheduleService {
 		$this->db->insert('fetches', ['date' => $this->scheduleDate, 'fetched_on' => $this->lastFetch]);
 	}
 
-	public function needsFetch() {
+	public function needsFetch() : bool {
 		$lastFetch = $this->getLastFetch();
 		return !$lastFetch || $lastFetch < time() - PATHE_DOWNLOAD_TTL;
 	}
 
-	public function getBaseUrl() {
+	public function getBaseUrl() : string {
 		return "https://www.pathe.nl";
 	}
 
-	public function getScheduleUrl() {
+	public function getScheduleUrl() : string {
 		$base = $this->getBaseUrl();
 		return "$base/bioscoop/{$this->city}?date={$this->scheduleDate}";
 	}
 
-	public function getMovieUrl( $href ) {
+	public function getMovieUrl( string $href ) : string {
 		$base = $this->getBaseUrl();
 		if ( $href[0] == '/' ) {
 			return "$base$href";
@@ -280,19 +293,22 @@ class ScheduleService {
 			]);
 		}
 		else {
-			$movie = Movie::find(Movie::insert([
+			$movie = Movie::create([
 				'pathe_id' => $id,
 				'name' => $name,
 				'first_fetch' => time(),
 				'last_fetch' => time(),
 				'release_date' => $releaseDate,
 				'last_known_date' => $lastKnownDate,
-			]));
+			]);
 		}
 
 		return $movie;
 	}
 
+	/**
+	 * @param list<string> $labels
+	 */
 	public function persistShowing( Movie $movie, string $startTime, string $endTime, array $labels ) : Showing {
 		$startTime = self::timePlus24($startTime) ?? $startTime;
 		$endTime = self::timePlus24($endTime) ?? $endTime;
@@ -314,7 +330,7 @@ class ScheduleService {
 			]);
 		}
 		else {
-			$showing = Showing::find(Showing::insert([
+			$showing = Showing::create([
 				'flags' => implode(' ', $labels),
 				'movie_id' => $movie->id,
 				'date' => $this->scheduleDate,
@@ -322,13 +338,13 @@ class ScheduleService {
 				'end_time' => $endTime,
 				'first_fetch' => time(),
 				'last_fetch' => time(),
-			]));
+			]);
 		}
 
 		return $showing;
 	}
 
-	public function fetch() {
+	public function fetch() : void {
 		$url = 'https://www.pathe.nl/api/shows?language=nl';
 		$this->requests[] = $url;
 		$rsp = $this->guzzle->get($url);
@@ -387,20 +403,22 @@ class ScheduleService {
 		$this->saveLastFetch();
 	}
 
-	static public function timePlus24( $time ) {
+	static public function timePlus24( string $time ) : ?string {
 		if ( $time < self::DAY_START ) {
 			list($hour, $minute) = explode(':', $time);
-			$hour += 24;
+			$hour = (int) $hour + 24;
 			return "$hour:$minute";
 		}
+		return null;
 	}
 
-	static public function timeMinus24( $time ) {
-		if ($time >= '24:00') {
+	static public function timeMinus24( string $time ) : ?string {
+		if ( $time >= '24:00' ) {
 			list($hour, $minute) = explode(':', $time);
-			$hour -= 24;
-			return str_pad($hour, 2, '0', STR_PAD_LEFT) . ":$minute";
+			$hour = (int) $hour - 24;
+			return sprintf("%02d:%02d", $hour, $minute);
 		}
+		return null;
 	}
 
 }

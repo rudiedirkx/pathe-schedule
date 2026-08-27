@@ -1,3 +1,8 @@
+<?php
+
+/** @var ?string $title */
+
+?>
 <!doctype html>
 <html lang="en">
 
