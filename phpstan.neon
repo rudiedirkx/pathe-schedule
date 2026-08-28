@@ -12,8 +12,6 @@ parameters:
 		# - src/
 	excludePaths:
 		- vendor/
-	universalObjectCratesClasses:
-		- db_generic_record
 	dynamicConstantNames:
 		- ADMIN_IPS
 		- IMDB_SEARCH_URL

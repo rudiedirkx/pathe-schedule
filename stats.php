@@ -8,17 +8,13 @@ require __DIR__ . '/inc.bootstrap.php';
 $title = 'Stats';
 include 'tpl.header.php';
 
-# bar 2
-
 $numFetches = db()->select_one('fetches', 'count(1)', '1');
 $dates = db()->fetch_first("select min(date) first, max(date) last from fetches where date > '1970-01-01'");
 $numMovies = db()->select_one('movies', 'count(1)', '1');
 $numShowings = db()->select_one('showings', 'count(1)', '1');
-/** @var array<string, int> */
 $rawFlags = db()->fetch("SELECT strftime('%Y', date) year, flags, COUNT(1) num FROM showings GROUP BY year, flags");
-// dd($rawFlags);
 
-/** @var array<int, array<string, int>> $flags */
+/** @var array<int, array<string, int>> $flagCounts */
 $flagCounts = [];
 foreach ($rawFlags as $row) {
 	$flag = preg_replace('#\bnacht (\d+[ -](?:\w+ )?op \d+[ -]\w+)#', 'nacht X op Y', strtolower($row->flags ?? ''));
